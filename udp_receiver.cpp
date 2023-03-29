@@ -9,17 +9,22 @@
 
 #include "shm.hpp"
 
+#define IPADDRESS "10.0.0.1" // "127.0.0.1"
+#define UDP_PORT 8080
+
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
 
 struct udp_receiver
 {
-    udp_receiver(shm& shm, int port) : shm_(shm), port(port)
+    udp_receiver(shm &shm, const char *host, int port)
+        : shm_(shm), host_ip(host), port(port)
     {
     }
 
     ~udp_receiver() = default;
 
+private:
     void handle_receive(const boost::system::error_code &error, size_t bytes_transferred)
     {
         if (error) {
@@ -27,7 +32,7 @@ struct udp_receiver
             return;
         }
         std::string message = std::string(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
-        std::cout << "Received: '" << message << "' (" << error.message() << ")\n";
+        std::cout << "\033[1;31mReceived: \033[0m" << message << std::endl;
 
         shm_.set_data(message);
 
@@ -36,33 +41,33 @@ struct udp_receiver
 
     void wait()
     {
-        socket.async_receive_from(boost::asio::buffer(recv_buffer),
-                                  remote_endpoint,
-                                  boost::bind(
-                                      &udp_receiver::handle_receive,
-                                      this,
-                                      boost::asio::placeholders::error,
-                                      boost::asio::placeholders::bytes_transferred
-                                  )
+        socket.async_receive(boost::asio::buffer(recv_buffer),
+                             boost::bind(
+                                 &udp_receiver::handle_receive,
+                                 this,
+                                 boost::asio::placeholders::error,
+                                 boost::asio::placeholders::bytes_transferred
+                             )
         );
     }
 
-    void receive() {
+public:
+    void receive()
+    {
         socket.open(udp::v4());
-        socket.bind(udp::endpoint(address::from_string("127.0.0.1"), port));
+        socket.bind(udp::endpoint(address::from_string(host_ip), port));
 
         wait();
 
-        std::cout << "Receiving\n";
         io_service.run();
-        std::cout << "Receiver exit\n";
     }
 
 private:
     boost::asio::io_service io_service;
     udp::socket socket{io_service};
     boost::array<char, 1024> recv_buffer;
-    udp::endpoint remote_endpoint;
-    shm& shm_;
+//    udp::endpoint remote_endpoint = udp::endpoint(address::from_string(IPADDRESS), UDP_PORT);
+    shm &shm_;
+    std::string host_ip;
     int port;
 };

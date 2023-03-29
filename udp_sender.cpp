@@ -19,7 +19,7 @@ struct udp_sender
 //        udp::resolver resolver(io_context);
         std::cout << "Client started" << std::endl;
         std::cout << h << std::endl;
-        receiver_endpoint = udp::endpoint(
+        destination_endpoint = udp::endpoint(
             address::from_string(h), // h.append(":").append(std::to_string(port))
             port
         );
@@ -31,7 +31,7 @@ struct udp_sender
     {
         udp::socket socket(io_context);
         socket.open(udp::v4());
-        socket.send_to(boost::asio::buffer(data), receiver_endpoint);
+        socket.send_to(boost::asio::buffer(data), destination_endpoint);
         std::cout << "Sent data: " << data << std::endl;
         socket.close();
     }
@@ -41,8 +41,8 @@ struct udp_sender
         std::string data = shm_.get_data_of_shm(offset);
         udp::socket socket(io_context);
         socket.open(udp::v4());
-        socket.send_to(boost::asio::buffer(data), receiver_endpoint);
-        std::cout << "Sent data: " << data << std::endl;
+        socket.send_to(boost::asio::buffer(data), destination_endpoint);
+        std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
         socket.close();
     }
 
@@ -51,13 +51,13 @@ struct udp_sender
         std::string data = shm_.get_data_of_shm(offset, length);
         udp::socket socket(io_context);
         socket.open(udp::v4());
-        socket.send_to(boost::asio::buffer(data), receiver_endpoint);
-        std::cout << "Sent data: " << data << std::endl;
+        socket.send_to(boost::asio::buffer(data), destination_endpoint);
+        std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
         socket.close();
     }
 
 private:
     boost::asio::io_context io_context;
-    udp::endpoint receiver_endpoint;
+    udp::endpoint destination_endpoint;
     shm& shm_;
 };
