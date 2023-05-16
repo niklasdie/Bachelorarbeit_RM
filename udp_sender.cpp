@@ -1,5 +1,5 @@
 //
-// Created by dev on 10.03.23.
+// Created by Niklas Diekhöner on 10.03.23.
 //
 
 #include <iostream>
@@ -13,51 +13,47 @@ using boost::asio::ip::address;
 
 struct udp_sender
 {
-    udp_sender(shm& shm, const char *host, int port) : shm_(shm)
+    udp_sender(shm &shm, const char *dest_ip, int port)
+        : shm_(shm), socket(udp::socket(io_context))
     {
-        std::string h(host);
-//        udp::resolver resolver(io_context);
-        std::cout << "Client started" << std::endl;
-        std::cout << h << std::endl;
+        std::string dest(dest_ip);
+        std::cout << "Client started at " << dest << std::endl;
+        socket.open(udp::v4());
         destination_endpoint = udp::endpoint(
-            address::from_string(h), // h.append(":").append(std::to_string(port))
+            address::from_string(dest), // dest.append(":").append(std::to_string(port))
             port
         );
     }
 
-    ~udp_sender() = default;
+    ~udp_sender()
+    {
+        socket.close();
+    };
 
+    // Create new Socket for each send?
     void send_data(std::string data)
     {
-        udp::socket socket(io_context);
-        socket.open(udp::v4());
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
         std::cout << "Sent data: " << data << std::endl;
-        socket.close();
     }
 
     void send_data(int offset)
     {
-        std::string data = shm_.get_data_of_shm(offset);
-        udp::socket socket(io_context);
-        socket.open(udp::v4());
+        std::string data = shm_.get_data(offset);
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
         std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
-        socket.close();
     }
 
     void send_data(int offset, int length)
     {
-        std::string data = shm_.get_data_of_shm(offset, length);
-        udp::socket socket(io_context);
-        socket.open(udp::v4());
+        std::string data = shm_.get_data(offset, length);
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
         std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
-        socket.close();
     }
 
 private:
     boost::asio::io_context io_context;
+    udp::socket socket;
     udp::endpoint destination_endpoint;
-    shm& shm_;
+    shm &shm_;
 };

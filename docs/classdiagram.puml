@@ -1,0 +1,85 @@
+@startuml
+
+class main{
+{static}main(argc: int, argv: *char[]): int
+}
+
+together {
+abstract shm{
+#region mapped_region
++{abstract}print_data(): void
++{abstract}set_data(data: const &std::string): bool
++{abstract}set_data(data: const &std::string, offset: int): bool
++{abstract}get_data(): std::string
++{abstract}get_data(offset: int): std::string
++{abstract}get_data(offset: int, length: int): std::string
+}
+
+struct shm_o{
++shm_o(size: int)
+-shm_obj: shared_memory_object
+}
+
+struct shm_f{
++shm_f(file: const &std::string, size: int)
+-shm_file: file_mapping
+}
+}
+
+shm <|-up- shm_o
+shm <|-up- shm_f
+
+together {
+struct udp_sender {
+-io_context: boost::asio::io_context
+-socket: udp::socket
+-destination_endpoint: udp::endpoint
+-shm_: &shm
++udp_sender(shm: &shm, dest_ip: const *char, port: int)
++send_data(data: std::string): void
++send_data(offset: int): void
++send_data(offset: int, length: int): void
+}
+
+struct udp_receiver{
+-io_service: boost::asio::io_service
+-socket: udp::socket
+-recv_buffer: boost::array<char, 1024>
+-shm_: &shm
+-host_ip: std::string
+-port: int
+-sender: &udp_sender
+-ti: &timer
++udp_receiver(shm: &shm, local_ip: const *char, port: int, sender: &udp_sender, ti: &timer)
+-handle_receive(error: const &boost::system::error_code, bytes_transferred: size_t):void
+-handle_receive_and_send_back(error: const &boost::system::error_code, bytes_transferred: size_t): void
+-wait(): void
+-wait_and_send_back(): void
++receive(): void
++receive_and_send_back(): void
+}
+}
+
+struct timer{
++start_: std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>
++end_: std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>
++average: std::vector<long>
++messages: std::vector<std::string>
++start(msg: std::string): void
++end(msg: std::string): void
++clear(): void
+}
+
+udp_sender o-up- shm
+udp_receiver o-up- shm
+udp_receiver o-up- udp_sender
+udp_receiver o-up- timer
+
+main -up-> shm_o: erstellt >
+main -up-> shm_f: erstellt >
+main -down-> udp_sender: erstellt >
+main -down-> udp_receiver: erstellt >
+main -right-> timer: erstellt >
+
+
+@enduml

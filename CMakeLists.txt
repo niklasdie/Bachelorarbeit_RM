@@ -18,6 +18,7 @@ add_executable(rm_poc
         main.cpp
         shm.hpp
         udp_sender.cpp
-        udp_receiver.cpp)
+        udp_receiver.cpp
+        timer.cpp)
 target_link_libraries(rm_poc  ${USED_LIBS} librt.so)
 
