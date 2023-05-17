@@ -1,0 +1,64 @@
+@startuml
+
+autonumber
+
+participant main order 10
+participant shm_o order 30
+participant udp_sender order 20
+participant udp_receiver order 40
+participant timer order 50
+
+activate main #FFBBBB
+
+main --[#red]> shm_o ** : creates
+activate shm_o #FFBBBB
+main -[#red]> shm_o : set_data(data)
+main --[#red]> timer**: creates
+activate timer #FFBBBB
+main --[#red]> udp_sender** : creates
+activate udp_sender #FFBBBB
+main --[#red]> udp_receiver** : creates
+activate udp_receiver #FFBBBB
+main -[#red]>> udp_receiver : receive() (new thread)
+note right #lightblue
+blue marks a
+new thread
+end note
+activate udp_receiver #lightblue
+main -[#red]> udp_sender : send_data(0)
+        udp_sender -[#red]> shm_o : get_data()
+        shm_o --[#red]> udp_sender : data
+        udp_sender -[#red]> udp_sender : send_to(data, endpoint)
+        udp_receiver -[#blue]> shm_o : set_data(message)
+main -[#red]> main: sleep(2000)
+timer -[#red]> timer : clear()
+
+alt send mode
+    main -[#red]> main : sleep(200)
+    loop 21 times
+        main -[#red]> main : sleep(5)
+        main -[#red]> timer : start("send")
+        main -[#red]> shm_o : set_data(data)
+        main -[#red]> udp_sender : send_data(0)
+        udp_sender -[#red]> shm_o : get_data()
+        shm_o --[#red]> udp_sender : data
+        udp_sender -[#red]> udp_sender : send_to(data, endpoint)
+        udp_receiver -[#blue]> shm_o : set_data(message)
+        udp_receiver -[#blue]> timer : end((message)
+        timer -[#red]> timer : print_time()
+    end
+else receive mode
+    main -[#red]> udp_receiver : stop receive()
+    deactivate udp_receiver
+    main -[#red]>> udp_receiver : receive_and_send_back() (new thread)
+    activate udp_receiver #lightblue
+end
+
+loop 1000 times
+    main -> main : sleep(5)
+end
+
+timer -[#red]> timer : print_average()
+destroy timer
+
+@enduml

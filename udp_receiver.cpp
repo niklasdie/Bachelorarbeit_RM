@@ -18,14 +18,36 @@ using boost::asio::ip::udp;
 using boost::asio::ip::address;
 
 struct udp_receiver {
-    udp_receiver(shm &shm, const char *local_ip, int port, udp_sender &sender, timer &ti)
-            : shm_(shm), host_ip(local_ip), port(port), sender(sender), ti(ti) {
+    udp_receiver(shm &shm, const char *host_ip, const char *dest_ip, int port, timer &ti)
+        : shm_(shm), host_ip(host_ip), dest_ip(dest_ip), port(port), ti(ti)
+    {
+        std::cout << "Client started at " << this->dest_ip << std::endl;
+        socket.open(udp::v4());
+        socket.bind(udp::endpoint(address::from_string(host_ip), port));
+        socket.non_blocking(true);
+        socket.native_non_blocking(true);
+        destination_endpoint = udp::endpoint(
+                address::from_string(this->dest_ip), // dest.append(":").append(std::to_string(port))
+                port
+        );
     }
 
-    ~udp_receiver() = default;
+    ~udp_receiver()
+    {
+        socket.close();
+    }
 
 private:
-    void handle_receive(const boost::system::error_code &error, size_t bytes_transferred) {
+    void handle_send(const boost::system::error_code &error, size_t bytes_to_transfer) {
+        if (error) {
+            std::cout << "Send failed: " << error.message() << "\n";
+            return;
+        }
+
+    }
+
+    void handle_receive(const boost::system::error_code &error, size_t bytes_transferred)
+    {
         if (error) {
             std::cout << "Receive failed: " << error.message() << "\n";
             return;
@@ -35,12 +57,13 @@ private:
 
         shm_.set_data(message);
 
-        ti.end();
+        ti.end(message);
 
         wait();
     }
 
-    void handle_receive_and_send_back(const boost::system::error_code &error, size_t bytes_transferred) {
+    void handle_receive_and_send_back(const boost::system::error_code &error, size_t bytes_transferred)
+    {
         if (error) {
             std::cout << "Receive failed: " << error.message() << "\n";
             return;
@@ -50,14 +73,15 @@ private:
 
         shm_.set_data(message);
 
-        ti.end();
+        ti.end(message);
 
-        sender.send_data(0);
+        send_data(0);
 
         wait_and_send_back();
     }
 
-    void wait() {
+    void wait()
+    {
         socket.async_receive(boost::asio::buffer(recv_buffer),
                              boost::bind(
                                      &udp_receiver::handle_receive,
@@ -68,7 +92,8 @@ private:
         );
     }
 
-    void wait_and_send_back() {
+    void wait_and_send_back()
+    {
         socket.async_receive(boost::asio::buffer(recv_buffer),
                              boost::bind(
                                      &udp_receiver::handle_receive_and_send_back,
@@ -80,16 +105,65 @@ private:
     }
 
 public:
-    void receive() {
-        socket.open(udp::v4());
-        socket.bind(udp::endpoint(address::from_string(host_ip), port));
+    // send
+    void send_data(std::string data)
+    {
+        socket.async_send_to(boost::asio::buffer(data),
+                             destination_endpoint,
+                             boost::bind(
+                                     &udp_receiver::handle_send,
+                                     this,
+                                     boost::asio::placeholders::error,
+                                     boost::asio::placeholders::bytes_transferred
+                                     )); // TODO: async_send_to ?
+        std::cout << "Sent data: " << data << std::endl;
+    }
 
-        wait();
+    void send_data(int offset)
+    {
+        std::string data = shm_.get_data(offset);
+        socket.async_send_to(boost::asio::buffer(data),
+                             destination_endpoint,
+                             boost::bind(
+                                     &udp_receiver::handle_send,
+                                     this,
+                                     boost::asio::placeholders::error,
+                                     boost::asio::placeholders::bytes_transferred
+                             ));
+        std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
+    }
+
+    void send_data(int offset, int length)
+    {
+        std::string data = shm_.get_data(offset, length);
+        socket.async_send_to(boost::asio::buffer(data),
+                             destination_endpoint,
+                             boost::bind(
+                                     &udp_receiver::handle_send,
+                                     this,
+                                     boost::asio::placeholders::error,
+                                     boost::asio::placeholders::bytes_transferred
+                             ));
+        std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
+    }
+
+    // receive
+    void receive()
+    {
+        socket.async_receive(boost::asio::buffer(recv_buffer),
+                             boost::bind(
+                                     &udp_receiver::handle_receive,
+                                     this,
+                                     boost::asio::placeholders::error,
+                                     boost::asio::placeholders::bytes_transferred
+                             )
+        );
 
         io_service.run();
     }
 
-    void receive_and_send_back() {
+    void receive_and_send_back()
+    {
         wait_and_send_back();
 
         io_service.run();
@@ -98,11 +172,12 @@ public:
 private:
     boost::asio::io_service io_service;
     udp::socket socket{io_service};
+    udp::endpoint destination_endpoint;
     boost::array<char, 1024> recv_buffer;
 //    udp::endpoint remote_endpoint = udp::endpoint(address::from_string(IPADDRESS), UDP_PORT);
     shm &shm_;
     std::string host_ip;
+    std::string dest_ip;
     int port;
-    udp_sender &sender;
     timer &ti;
 };

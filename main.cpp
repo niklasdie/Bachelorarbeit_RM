@@ -23,20 +23,21 @@ int main(int argc, char *argv[]) {
     // file mapping
 //    shm_f s("/home/dev/CLionProjects/proof_of_concept/shm_file.txt", 20);
 
-//    s.set_data("Hello World");
+    s.set_data("Hello World");
     std::cout << "Data: " << s.get_data() << std::endl;
 
     // Timer
     timer ti{};
 
     // UDP
-    udp_sender client(s, argv[2], port);
-    udp_receiver server(s, argv[1], port, client, ti);
-    boost::thread th(boost::bind(&udp_receiver::receive, &server));
+//    udp_sender client(s, argv[2], port);
+    udp_receiver server(s, argv[1], argv[2], port, ti);
+    server.receive();
+//    boost::thread th(boost::bind(&udp_receiver::receive, &server));
     std::cout << "Thread started" << std::endl;
 
     // send first package
-    client.send_data(0);
+    server.send_data(0);
 
     // wait if receive package
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
@@ -48,21 +49,21 @@ int main(int argc, char *argv[]) {
         std::cout << "Start sending" << std::endl;
         for (int i = 0; i < 21; i++) {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
-            ti.start();
+            ti.start("send");
             s.set_data(new char('0' + (i % 10)), i);
-            client.send_data(0);
+            server.send_data(0);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        th.interrupt();
+//        th.interrupt();
     } else { // Receive Mode
         ti.clear();
         std::cout << "\033[1;42mReceive Mode\033[0m" << std::endl;
-        th.interrupt();
-        std::cout << "Old thread stopped" << std::endl;
-        boost::thread th2(boost::bind(&udp_receiver::receive_and_send_back, &server));
-        std::cout << "Thread started" << std::endl;
+//        th.interrupt();
+//        std::cout << "Old thread stopped" << std::endl;
+//        boost::thread th2(boost::bind(&udp_receiver::receive_and_send_back, &server));
+//        std::cout << "Thread started" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        th2.interrupt();
+//        th2.interrupt();
     }
 
 //    for (int i = 0; i < 1000; i++) {
