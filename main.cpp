@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Start sending" << std::endl;
         for (int i = 0; i < 21; i++) {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
-            ti.start();
+            ti.start(s.get_data());
             s.set_data(new char('0' + (i % 10)), i);
             client.send_data(0);
         }

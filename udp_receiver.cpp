@@ -20,6 +20,8 @@ using boost::asio::ip::address;
 struct udp_receiver {
     udp_receiver(shm &shm, const char *local_ip, int port, udp_sender &sender, timer &ti)
             : shm_(shm), host_ip(local_ip), port(port), sender(sender), ti(ti) {
+        socket.open(udp::v4());
+        socket.bind(udp::endpoint(address::from_string(host_ip), port));
     }
 
     ~udp_receiver() = default;
@@ -35,7 +37,7 @@ private:
 
         shm_.set_data(message);
 
-        ti.end();
+        ti.end(message);
 
         wait();
     }
@@ -49,8 +51,6 @@ private:
         std::cout << "\033[1;31mReceived: \033[0m" << message << std::endl;
 
         shm_.set_data(message);
-
-        ti.end();
 
         sender.send_data(0);
 
@@ -81,9 +81,6 @@ private:
 
 public:
     void receive() {
-        socket.open(udp::v4());
-        socket.bind(udp::endpoint(address::from_string(host_ip), port));
-
         wait();
 
         io_service.run();
