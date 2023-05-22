@@ -6,7 +6,6 @@
 #include <chrono>
 #include <vector>
 #include <numeric>
-#include <algorithm>
 
 
 struct timer
@@ -27,7 +26,7 @@ struct timer
             }
             std::cout << "Average time: "
                       << std::accumulate(average.begin(), average.end(), 0) / average.size()
-                      << "[µs]" << std::endl;
+                      << "[µs]\n";
         }
     };
 
@@ -37,16 +36,15 @@ struct timer
         start_.push_back(std::chrono::high_resolution_clock::now());
     }
 
-    void end(std::string msg)
+    void end()
     {
         end_.push_back(std::chrono::high_resolution_clock::now());
-        // TODO: Füge die Nachricht an richtiger Stelle ein
         if (start_.size() > 0) {
-            std::cout << start_.size() << std::endl << end_.size() << std::endl;
+            std::cout << "Start times: " << start_.size() << "\nEnd times: " << end_.size() << "\n";
             average.push_back(std::chrono::duration_cast<std::chrono::microseconds>(
                     end_.at(end_.size() - 1) - start_.at(start_.size() - 1)
             ).count());
-            std::cout << "Time: " << average.at(average.size() - 1) << "[µs]" << std::endl;
+            std::cout << "Time: " << average.at(average.size() - 1) << "[µs]\n";
         }
     }
 

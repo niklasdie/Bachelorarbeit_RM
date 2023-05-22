@@ -28,14 +28,16 @@ protected:
 };
 
 // SM
+template<typename T>
 struct shm_o: public shm
 {
-    explicit shm_o(int size)
+    explicit shm_o(T data)
     {
         shared_memory_object::remove("lsm");
 
         shm_obj = shared_memory_object(create_only, "lsm", read_write);
-        shm_obj.truncate(size);
+        shm_obj.truncate(data);
+//        shm_obj.
 
         region = mapped_region(shm_obj, read_write);
 

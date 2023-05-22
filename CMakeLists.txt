@@ -14,11 +14,19 @@ set(USED_LIBS ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBR
 
 #set(CMAKE_CXX_FLAGS "-L /usr/lib/ -lboost_system -lboost_thread -lpthread")
 
-add_executable(rm_poc
+add_executable(
+        rm_poc
         main.cpp
         shm.hpp
         udp_sender.cpp
         udp_receiver.cpp
-        timer.cpp)
+        timer.cpp
+        )
+
+add_executable(
+        application_simulator
+        application_simulator.cpp
+        application_simulator.hpp
+)
 target_link_libraries(rm_poc  ${USED_LIBS} librt.so)
 

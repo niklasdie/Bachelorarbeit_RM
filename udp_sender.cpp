@@ -17,7 +17,7 @@ struct udp_sender
         : shm_(shm), socket(udp::socket(io_context))
     {
         std::string dest(dest_ip);
-        std::cout << "Client started at " << dest << std::endl;
+        std::cout << "Client started at " << dest << "\n";
         socket.open(udp::v4());
         destination_endpoint = udp::endpoint(
             address::from_string(dest), // dest.append(":").append(std::to_string(port))
@@ -28,27 +28,29 @@ struct udp_sender
     ~udp_sender()
     {
         socket.close();
-    };
+    }
 
-    // Create new Socket for each send?
     void send_data(std::string data)
     {
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
-        std::cout << "Sent data: " << data << std::endl;
+        std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
+//        std::cout << "\033[1;32mSent data\033[0m\n";
     }
 
     void send_data(int offset)
     {
         std::string data = shm_.get_data(offset);
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
-        std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
+        std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
+//        std::cout << "\033[1;32mSent data\033[0m\n";
     }
 
     void send_data(int offset, int length)
     {
         std::string data = shm_.get_data(offset, length);
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
-        std::cout << "\033[1;32mSent data: \033[0m" << data << std::endl;
+        std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
+//        std::cout << "\033[1;32mSent data\033[0m\n";
     }
 
 private:
