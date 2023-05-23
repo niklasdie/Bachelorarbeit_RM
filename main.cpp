@@ -7,7 +7,7 @@
 #include <boost/thread.hpp>
 
 #include "udp_receiver.cpp"
-#include "shm.hpp"
+#include "shm.cpp"
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -19,12 +19,14 @@ int main(int argc, char *argv[]) {
 
     // data size
     int data_size = 100;
+    // shm name
+    const char* shm_name = "rm_shm";
 
     // shm_file
-//    shm_o s(data_size);
+    shm_o s(data_size, shm_name);
 
     // file mapping
-    shm_f s("shm_data.hpp", 20);
+//    shm_f s("shm_file.txt", data_size);
 
 //    s.set_data("Hello World");
     std::cout << "Data: " << s.get_data() << "\n";
@@ -49,8 +51,8 @@ int main(int argc, char *argv[]) {
         std::cout << "\033[1;42mSend Mode\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         std::cout << "Start sending\n";
-        for (int i = 0; i < data_size; i++) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        for (int i = 0; i < 1000; i++) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
             ti.start(s.get_data());
             s.set_data(new char('0' + (i % 10)), i);
             client.send_data(0);
@@ -67,7 +69,7 @@ int main(int argc, char *argv[]) {
         udp_receiver server2(s, argv[1], port, client, ti);
         boost::thread th2(boost::bind(&udp_receiver::receive_and_send_back, &server2));
         std::cout << "Thread started\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(100000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         th2.interrupt();
         server2.interrupt();
     }

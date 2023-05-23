@@ -18,10 +18,11 @@ add_executable(
         rm_poc
         main.cpp
         shm.hpp
+        shm.cpp
         udp_sender.cpp
         udp_receiver.cpp
         timer.cpp
-        )
+)
 
 add_executable(
         application_simulator
