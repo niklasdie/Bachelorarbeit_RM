@@ -1,1 +1,1 @@
-This is a proof of concept Reflective Memory for my bachelor thesis.
+Reflective Memory Daemon for my bachelor thesis.
