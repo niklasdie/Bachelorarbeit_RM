@@ -6,7 +6,7 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
-#include "shm.hpp"
+#include "shm.cpp"
 
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
@@ -30,24 +30,9 @@ struct udp_sender
         socket.close();
     }
 
-    void send_data(std::string data)
+    void send_data()
     {
-        socket.send_to(boost::asio::buffer(data), destination_endpoint);
-        std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
-//        std::cout << "\033[1;32mSent data\033[0m\n";
-    }
-
-    void send_data(int offset)
-    {
-        std::string data = shm_.get_data(offset);
-        socket.send_to(boost::asio::buffer(data), destination_endpoint);
-        std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
-//        std::cout << "\033[1;32mSent data\033[0m\n";
-    }
-
-    void send_data(int offset, int length)
-    {
-        std::string data = shm_.get_data(offset, length);
+        std::string data = shm_.get_data();
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
         std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
 //        std::cout << "\033[1;32mSent data\033[0m\n";

@@ -4,42 +4,41 @@
 
 #ifndef SERVER_APPLICATION_SIMULATOR_HPP
 #define SERVER_APPLICATION_SIMULATOR_HPP
+
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
 #include <iostream>
 
-struct application_simulator {
+using namespace boost::interprocess;
+
+struct inner_struct {
+    std::string data1;
+    std::string data2;
+    std::string data3;
+    std::string data4;
+    std::string data5;
+    std::string data6;
+};
+
+struct shm_struct
+{
     std::string data;
     int i;
     long l;
     double d;
     bool b;
     char c;
-
-    application_simulator()
-    {
-        data = "Hello World";
-        i = 0;
-        l = 1;
-        d = 0.01;
-        b = false;
-        c = 'a';
-    };
-
-public:
-
-    void do_something()
-    {
-        data += "!";
-        i++;
-        ++l;
-        d+= 0.01;
-        b  = !b;
-        if (c == 'z') {
-            c = 'a';
-        } else {
-            c++;
-        }
-    }
+    inner_struct innerStruct;
 };
 
+//std::ostream &operator<<(std::ostream &os, const shm_struct &s)
+//{
+//    return (os << s.data << " | " <<
+//               s.i << " | " <<
+//               s.l << " | " <<
+//               s.d << " | " <<
+//               s.b << " | " <<
+//               s.c);
+//}
 
 #endif //SERVER_APPLICATION_SIMULATOR_HPP
