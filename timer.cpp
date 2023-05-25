@@ -30,9 +30,8 @@ struct timer
         }
     };
 
-    void start(std::string msg)
+    void start()
     {
-        messages.push_back(msg);
         start_.push_back(std::chrono::high_resolution_clock::now());
     }
 

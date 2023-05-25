@@ -9,6 +9,7 @@
 
 #include "shm.hpp"
 #include "udp_sender.cpp"
+#include "shm.cpp"
 #include "timer.cpp"
 
 #define IPADDRESS "10.0.0.1" // "127.0.0.1"
@@ -60,7 +61,7 @@ private:
 
         shm_.set_data(message);
 
-        sender.send_data(0);
+        sender.send_data();
 
         wait_and_send_back();
     }

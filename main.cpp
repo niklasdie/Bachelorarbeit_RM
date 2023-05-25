@@ -6,8 +6,9 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#include "shm.cpp"
 #include "udp_receiver.cpp"
-#include "shm.hpp"
+#include "application_simulator.cpp"
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -17,17 +18,14 @@ int main(int argc, char *argv[]) {
 
     int port = 8080;
 
-    // data size
-    int data_size = 100;
+    // shm name
+    const char* shm_name = "rm_shm";
 
-    // shm_file
-//    shm_o s(data_size);
-
-    // file mapping
-    shm_f s("shm_data.hpp", 20);
+    // shm
+    shm_o s(shm_name);
 
 //    s.set_data("Hello World");
-    std::cout << "Data: " << s.get_data() << "\n";
+//    std::cout << "Data: " << s.get_data_struct() << "\n";
 
     // Timer
     timer ti{};
@@ -39,21 +37,24 @@ int main(int argc, char *argv[]) {
     std::cout << "Thread started" << std::endl;
 
     // send first package
-    client.send_data(0);
+    client.send_data();
 
     // wait if receive package
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
     if (ti.end_.size() == 0) { // Send Mode
         ti.clear();
+        application_simulator simulator(shm_name);
         std::cout << "\033[1;42mSend Mode\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         std::cout << "Start sending\n";
-        for (int i = 0; i < data_size; i++) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
-            ti.start(s.get_data());
-            s.set_data(new char('0' + (i % 10)), i);
-            client.send_data(0);
+        for (int i = 0; i < 1000; i++) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            ti.start();
+            simulator.do_something();
+            std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
+            std::cout << "\t\033[1;32mData shm:       \033[0m" << s.get_data_struct() << "\n";
+            client.send_data();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         th.interrupt();
@@ -67,13 +68,12 @@ int main(int argc, char *argv[]) {
         udp_receiver server2(s, argv[1], port, client, ti);
         boost::thread th2(boost::bind(&udp_receiver::receive_and_send_back, &server2));
         std::cout << "Thread started\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(100000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         th2.interrupt();
         server2.interrupt();
     }
 
-    std::cout << data_size << " chars and messages tested.\n"
-    << "One message contains " << s.get_data().size() * sizeof(char) << " bytes.\n";
+    std::cout << "Shm size: " << sizeof(s.get_data_struct()) << " bytes.\n";
     
     return 0;
 }
