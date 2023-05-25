@@ -19,14 +19,19 @@ struct application_simulator
             << "Shm Address:    " << region.get_address() << ", Shm Length:    " << region.get_size()
             << "\nObject address: " << shm_s << ", Object Length: " << sizeof(*shm_s) << "\033[0m\n";
 
-
+        (*shm_s).data = "Hello World";
+        (*shm_s).i = 0;
+        (*shm_s).l = 100;
+        (*shm_s).d = 1.1;
+        (*shm_s).b = false;
+        (*shm_s).c = 'a';
     };
 
 public:
 
     void do_something()
     {
-        (*shm_s).data += "!";
+//        (*shm_s).data += "!";
         (*shm_s).i++;
         ++(*shm_s).l;
         (*shm_s).d += 0.01;
@@ -36,7 +41,6 @@ public:
         } else {
             (*shm_s).c++;
         }
-        std::cout << "do_something()\n";
     }
 
     shared_memory_object shm_obj;
@@ -44,3 +48,12 @@ public:
     shm_struct *shm_s;
 };
 
+std::ostream &operator<<(std::ostream &os, const shm_struct &s)
+{
+    return (os << s.data << " | " <<
+               s.i << " | " <<
+               s.l << " | " <<
+               s.d << " | " <<
+               s.b << " | " <<
+               s.c);
+}

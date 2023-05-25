@@ -15,10 +15,10 @@
 struct shm
 {
 public:
-//    virtual void print_data() const = 0;
     virtual bool set_data(const std::string &data) = 0;
     virtual bool set_data(const shm_struct &data) = 0;
-    virtual std::string get_data() = 0;
+    virtual std::string get_data_bytes_as_string() = 0;
+    virtual shm_struct get_data_struct() = 0;
 
 protected:
     mapped_region region;
@@ -52,8 +52,9 @@ struct shm_o: shm
 
     ~shm_o()
     {
+        // deleting memory once is enough
+//        delete shm_s;
         shared_memory_object::remove(shm_name);
-        delete shm_s;
     }
 
 public:
@@ -83,7 +84,7 @@ public:
         return true;
     }
 
-    std::string get_data() override
+    std::string get_data_bytes_as_string() override
     {
         while(in_use) {}
         char *mem = static_cast<char *>(region.get_address());
@@ -92,6 +93,12 @@ public:
             s += *mem++;
         }
         return s;
+    }
+
+    shm_struct get_data_struct() override
+    {
+        while(in_use) {}
+        return *((shm_struct*) region.get_address());
     }
 
 private:

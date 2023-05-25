@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     shm_o s(shm_name);
 
 //    s.set_data("Hello World");
-    std::cout << "Data: " << s.get_data() << "\n";
+//    std::cout << "Data: " << s.get_data_struct() << "\n";
 
     // Timer
     timer ti{};
@@ -48,12 +48,12 @@ int main(int argc, char *argv[]) {
         std::cout << "\033[1;42mSend Mode\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         std::cout << "Start sending\n";
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
             ti.start();
             simulator.do_something();
-//            std::cout << "\033[1;42mData simulator: \033[0m" << *simulator.shm_s << "\n";
-            std::cout << "\033[1;42mData shm:       \033[0m" << s.get_data() << "\n";
+            std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
+            std::cout << "\t\033[1;32mData shm:       \033[0m" << s.get_data_struct() << "\n";
             client.send_data();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         server2.interrupt();
     }
 
-    std::cout << "Shm size: " << sizeof(s.get_data()) << " bytes.\n";
+    std::cout << "Shm size: " << sizeof(s.get_data_struct()) << " bytes.\n";
     
     return 0;
 }

@@ -32,7 +32,7 @@ struct udp_sender
 
     void send_data()
     {
-        std::string data = shm_.get_data();
+        std::string data = shm_.get_data_bytes_as_string();
         socket.send_to(boost::asio::buffer(data), destination_endpoint);
         std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
 //        std::cout << "\033[1;32mSent data\033[0m\n";
