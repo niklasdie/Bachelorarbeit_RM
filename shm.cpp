@@ -15,7 +15,7 @@
 struct shm
 {
 public:
-    virtual bool set_data(const std::string &data) = 0;
+    virtual bool set_data(const char* data) = 0;
     virtual bool set_data(const shm_struct &data) = 0;
     virtual std::string get_data_bytes_as_string() = 0;
     virtual shm_struct get_data_struct() = 0;
@@ -59,17 +59,12 @@ struct shm_o: shm
 
 public:
 
-//    void print_data() const override
-//    {
-//        std::cout << *shm_s << std::endl;
-//    }
-
-    bool set_data(const std::string &data) override
+    bool set_data(const char* data) override
     {
         in_use = true;
         char *mem = static_cast<char *>(region.get_address());
-        for (char c: data) {
-            std::memset(mem, c, 1);
+        for (size_t i = 0; data[i] != '\0'; ++i) {
+            std::memset(mem, data[i], 1);
             *mem++;
         }
         in_use = false;
@@ -87,7 +82,7 @@ public:
     std::string get_data_bytes_as_string() override
     {
         while(in_use) {}
-        char *mem = static_cast<char *>(region.get_address());
+        char *mem = (char *) region.get_address();
         std::string s;
         for (std::size_t i = 0; i < region.get_size(); ++i) {
             s += *mem++;
@@ -106,15 +101,5 @@ private:
     bool in_use;
     const char* shm_name;
 };
-
-//void rm_in(const void* source, const void* destination, int length)
-//{
-//
-//}
-//
-//void rm_out(const void* source, const void* destination, int length)
-//{
-//
-//}
 
 #endif

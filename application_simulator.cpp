@@ -27,6 +27,11 @@ struct application_simulator
         (*shm_s).c = 'a';
     };
 
+    ~application_simulator()
+    {
+
+    }
+
 public:
 
     void do_something()

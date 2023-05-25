@@ -6,9 +6,10 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#include "shm.cpp"
-#include "udp_receiver.cpp"
 #include "application_simulator.cpp"
+
+// api
+#include "shm_api.cpp"
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -36,19 +37,23 @@ int main(int argc, char *argv[]) {
     boost::thread th(boost::bind(&udp_receiver::receive, &server));
     std::cout << "Thread started" << std::endl;
 
+    // api
+//    shm_api api(shm_o, client);
+
     // send first package
     client.send_data();
 
     // wait if receive package
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
+    application_simulator simulator(shm_name);
+
     if (ti.end_.size() == 0) { // Send Mode
         ti.clear();
-        application_simulator simulator(shm_name);
         std::cout << "\033[1;42mSend Mode\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         std::cout << "Start sending\n";
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10; i++) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
             ti.start();
             simulator.do_something();
@@ -68,12 +73,18 @@ int main(int argc, char *argv[]) {
         udp_receiver server2(s, argv[1], port, client, ti);
         boost::thread th2(boost::bind(&udp_receiver::receive_and_send_back, &server2));
         std::cout << "Thread started\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        std::cout << "\t\033[1;32mData simulator before: \033[0m" << *simulator.shm_s << "\n";
+        std::cout << "\t\033[1;32mData shm before:       \033[0m" << s.get_data_struct() << "\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::cout << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s << "\n";
+        std::cout << "\t\033[1;31mData shm after:       \033[0m" << s.get_data_struct() << "\n";
         th2.interrupt();
         server2.interrupt();
     }
 
-    std::cout << "Shm size: " << sizeof(s.get_data_struct()) << " bytes.\n";
-    
+    // TODO: Programm stoppt nicht ordentlich
+
+//    std::cout << "Shm size: " << sizeof(s.get_data_struct()) << " bytes.\n";
+
     return 0;
 }

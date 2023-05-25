@@ -7,7 +7,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
-#include "shm.hpp"
+#include "shm_api.hpp"
 #include "udp_sender.cpp"
 #include "shm.cpp"
 #include "timer.cpp"
@@ -39,10 +39,10 @@ private:
             return;
         }
         std::string message = std::string(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
-        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
+//        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
 //        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes\033[0m\n";
 
-        shm_.set_data(message);
+        shm_.set_data(message.c_str());
 
         ti.end();
 
@@ -56,10 +56,10 @@ private:
             return;
         }
         std::string message = std::string(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
-        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
+//        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
 //        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes\033[0m\n";
 
-        shm_.set_data(message);
+        shm_.set_data(message.c_str());
 
         sender.send_data();
 
