@@ -40,13 +40,13 @@ int main(int argc, char *argv[]) {
     // api
 //    shm_api api(shm_o, client);
 
+    application_simulator simulator(shm_name);
+
     // send first package
     client.send_data();
 
     // wait if receive package
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-
-    application_simulator simulator(shm_name);
 
     if (ti.end_.size() == 0) { // Send Mode
         ti.clear();
@@ -75,14 +75,12 @@ int main(int argc, char *argv[]) {
         std::cout << "Thread started\n";
         std::cout << "\t\033[1;32mData simulator before: \033[0m" << *simulator.shm_s << "\n";
         std::cout << "\t\033[1;32mData shm before:       \033[0m" << s.get_data_struct() << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         std::cout << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s << "\n";
         std::cout << "\t\033[1;31mData shm after:       \033[0m" << s.get_data_struct() << "\n";
         th2.interrupt();
         server2.interrupt();
     }
-
-    // TODO: Programm stoppt nicht ordentlich
 
 //    std::cout << "Shm size: " << sizeof(s.get_data_struct()) << " bytes.\n";
 

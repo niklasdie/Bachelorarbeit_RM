@@ -15,10 +15,14 @@
 struct shm
 {
 public:
-    virtual bool set_data(const char* data) = 0;
-    virtual bool set_data(const shm_struct &data) = 0;
+    virtual void* get_data() = 0;
+    virtual size_t get_size() = 0;
+    virtual const char* get_name() = 0;
     virtual std::string get_data_bytes_as_string() = 0;
     virtual shm_struct get_data_struct() = 0;
+    virtual bool set_data(void* start, size_t length) = 0;
+    virtual bool set_data(const std::string &data) = 0;
+    virtual bool set_data(const shm_struct &data) = 0;
 
 protected:
     mapped_region region;
@@ -59,13 +63,21 @@ struct shm_o: shm
 
 public:
 
-    bool set_data(const char* data) override
+    bool set_data(void* start, size_t length) override
     {
         in_use = true;
-        char *mem = static_cast<char *>(region.get_address());
-        for (size_t i = 0; data[i] != '\0'; ++i) {
-            std::memset(mem, data[i], 1);
-            *mem++;
+        std::memcpy(region.get_address(), start, length);
+        in_use = false;
+        return true;
+    }
+
+    bool set_data(const std::string &data) override
+    {
+        in_use = true;
+        char *mem = (char *) region.get_address();
+        for (char c : data) {
+            std::memset(mem, c, 1);
+            mem++;
         }
         in_use = false;
         return true;
@@ -79,11 +91,26 @@ public:
         return true;
     }
 
+    void* get_data() override
+    {
+        return region.get_address();
+    }
+
+    size_t get_size() override
+    {
+        return region.get_size();
+    }
+
+    const char* get_name()
+    {
+        return shm_name;
+    }
+
     std::string get_data_bytes_as_string() override
     {
         while(in_use) {}
         char *mem = (char *) region.get_address();
-        std::string s;
+        std::string s;//(region.get_address(), ((char*) region.get_address()) + region.get_size());
         for (std::size_t i = 0; i < region.get_size(); ++i) {
             s += *mem++;
         }

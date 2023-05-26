@@ -53,12 +53,3 @@ public:
     shm_struct *shm_s;
 };
 
-std::ostream &operator<<(std::ostream &os, const shm_struct &s)
-{
-    return (os << s.data << " | " <<
-               s.i << " | " <<
-               s.l << " | " <<
-               s.d << " | " <<
-               s.b << " | " <<
-               s.c);
-}

@@ -24,6 +24,7 @@ struct udp_receiver {
     {
         socket.open(udp::v4());
         socket.bind(udp::endpoint(address::from_string(host_ip), port));
+        socket.set_option(boost::asio::socket_base::receive_buffer_size(1024));
     }
 
     ~udp_receiver()
@@ -38,11 +39,14 @@ private:
             std::cout << "Receive failed: " << error.message() << "\n";
             return;
         }
-        std::string message = std::string(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
 //        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
-//        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes\033[0m\n";
+        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes; \033[0m" << error.message() << "\n";
 
-        shm_.set_data(message.c_str());
+//        shm_.set_data(recv_buffer.c_array(), bytes_transferred);
+
+        std::cout << "\t\033[1;41mReceived:\033[0m\n";
+        std::cout << "\t\033[1;32mData message: \033[0m" << shm_.get_data_bytes_as_string() << "\n";
+        std::cout << "\t\033[1;32mMessage size: \033[0m" << sizeof(shm_.get_data_struct()) << "\n";
 
         ti.end();
 
@@ -55,11 +59,13 @@ private:
             std::cout << "Receive failed: " << error.message() << "\n";
             return;
         }
-        std::string message = std::string(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
+//        std::string message(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
 //        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
-//        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes\033[0m\n";
+        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes; \033[0m" << error.message() << "\n";
 
-        shm_.set_data(message.c_str());
+        shm_.set_data(recv_buffer.c_array(), bytes_transferred);
+//        std::cout << "\t\033[1;32mData message: \033[0m" << message.c_str() << "\n";
+//        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_bytes_as_string() << "\n";
 
         sender.send_data();
 
@@ -68,7 +74,7 @@ private:
 
     void wait()
     {
-        socket.async_receive(boost::asio::buffer(recv_buffer),
+        socket.async_receive(boost::asio::buffer(shm_.get_data(), shm_.get_size()),
                              boost::bind(
                                      &udp_receiver::handle_receive,
                                      this,
@@ -113,8 +119,8 @@ public:
 private:
     boost::asio::io_service io_service;
     udp::socket socket{io_service};
-    boost::array<char, 1024> recv_buffer;
     shm &shm_;
+    boost::array<char, 1024> recv_buffer;
     std::string host_ip;
     udp_sender &sender;
     timer &ti;
