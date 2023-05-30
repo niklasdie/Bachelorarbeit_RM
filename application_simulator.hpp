@@ -5,19 +5,14 @@
 #ifndef SERVER_APPLICATION_SIMULATOR_HPP
 #define SERVER_APPLICATION_SIMULATOR_HPP
 
-#include <boost/interprocess/shared_memory_object.hpp>
-#include <boost/interprocess/mapped_region.hpp>
-#include <iostream>
-
-using namespace boost::interprocess;
 
 struct inner_struct8 {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -26,12 +21,12 @@ struct inner_struct8 {
 };
 
 struct inner_struct7 {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -40,12 +35,12 @@ struct inner_struct7 {
 };
 
 struct inner_struct6 {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -54,12 +49,12 @@ struct inner_struct6 {
 };
 
 struct inner_struct5 {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -68,12 +63,12 @@ struct inner_struct5 {
 };
 
 struct inner_struct4 {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -82,12 +77,12 @@ struct inner_struct4 {
 };
 
 struct inner_struct3 {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -96,12 +91,12 @@ struct inner_struct3 {
 };
 
 struct inner_struct2 {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -110,12 +105,12 @@ struct inner_struct2 {
 };
 
 struct inner_struct {
-    const char* data1;
-    const char* data2;
-    const char* data3;
-    const char* data4;
-    const char* data5;
-    const char* data6;
+    char data[12] = "Hello World";
+    char data2;
+    char data3;
+    char data4;
+    char data5;
+    char data6;
     int i2;
     long l2;
     double d2;
@@ -123,9 +118,8 @@ struct inner_struct {
     char c2;
 };
 
-struct shm_struct
-{
-    const char* data;
+struct shm_struct {
+    char data[12] = "Hello World";
     int i;
     long l;
     double d;
@@ -141,8 +135,7 @@ struct shm_struct
     inner_struct innerStruct8;
 };
 
-static std::ostream &operator<<(std::ostream &os, const shm_struct &s)
-{
+static std::ostream &operator<<(std::ostream &os, const shm_struct &s) {
     return (os << s.data << " | " <<
                s.i << " | " <<
                s.l << " | " <<
@@ -152,3 +145,5 @@ static std::ostream &operator<<(std::ostream &os, const shm_struct &s)
 }
 
 #endif //SERVER_APPLICATION_SIMULATOR_HPP
+
+//#define this_is_a_long_name_for_an_int i

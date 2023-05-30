@@ -23,7 +23,7 @@ add_executable(
         udp_sender.cpp
         udp_receiver.cpp
         timer.cpp
-)
+        udp_buffer.hpp)
 
 add_executable(
         application_simulator

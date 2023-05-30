@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <boost/array.hpp>
 #include <boost/asio.hpp>
 
 #include "shm.cpp"
@@ -31,17 +30,39 @@ struct udp_sender
         socket.close();
     }
 
+    // TODO
+    /// Send segments of shm.
+
+    // TODO
+    /// Fill a buffer with data to send and send it at once cyclic
+    /// or send it if buffer is full.
+
+    // TODO
+    /// Write own buffer with {count, [package1], [package2], ...}.
+    /// [package] = {start_ptr, length, data}
+
     void send_data()
     {
-//        std::string message = shm_.get_data_bytes_as_string();
         std::cout << "\t\033[1;42mSent:\033[0m\n";
-        std::cout << "\t\033[1;32mData message: \033[0m" << shm_.get_data_bytes_as_string() << "\n";
-        std::cout << "\t\033[1;32mMessage size: \033[0m" << sizeof(*(shm_struct *) shm_.get_data()) << "\n";
+        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
+
         socket.send_to(boost::asio::buffer(
                 shm_.get_data(), shm_.get_size()
                 ), destination_endpoint);
-//        std::cout << "\033[1;32mSent data: \033[0m" << data << "\n";
-//        std::cout << "\033[1;32mSent data\033[0m\n";
+
+    }
+
+    void send_data(void *source, int length)
+    {
+        std::cout << "\t\033[1;42mSent:\033[0m\n";
+        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
+
+        udp_buffer package(source, length);
+
+        socket.send_to(boost::asio::buffer(
+                &package, sizeof(package)
+        ), destination_endpoint);
+
     }
 
 private:

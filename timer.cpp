@@ -24,9 +24,9 @@ struct timer
             for (long l: average) {
                 sum += l;
             }
-            std::cout << "Average time: "
+            std::cout << "\033[1;33mAverage time: "
                       << std::accumulate(average.begin(), average.end(), 0) / average.size()
-                      << "[µs]\n";
+                      << "[µs]\033[0m\n";
         }
     };
 
@@ -39,7 +39,7 @@ struct timer
     {
         end_.push_back(std::chrono::high_resolution_clock::now());
         if (start_.size() > 0) {
-            std::cout << "Start times: " << start_.size() << "\nEnd times: " << end_.size() << "\n";
+//            std::cout << "Start times: " << start_.size() << "\nEnd times: " << end_.size() << "\n";
             average.push_back(std::chrono::duration_cast<std::chrono::microseconds>(
                     end_.at(end_.size() - 1) - start_.at(start_.size() - 1)
             ).count());
