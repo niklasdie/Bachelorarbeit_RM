@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
             std::cout << "\033[1;42mSend Mode\033[0m\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
             std::cout << "Start sending\n";
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 simulator.do_something();
 //                std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
@@ -76,14 +76,14 @@ int main(int argc, char *argv[]) {
             std::cout << "Thread started\n";
             std::cout << "\t\033[1;32mData simulator before: \033[0m" << *simulator.shm_s << "\n";
             std::cout << "\t\033[1;32mData shm before:       \033[0m" << s.get_data_struct() << "\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
             std::cout << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s << "\n";
             std::cout << "\t\033[1;31mData shm after:       \033[0m" << s.get_data_struct() << "\n";
             th2.interrupt();
             server2.interrupt();
         }
 
-        std::cout << "\033[1;33mData shm end:       \033[0m" << s.get_data_struct() << "\033[0m\n";
+        std::cout << "\033[1;33mData shm end: " << s.get_data_struct() << "\033[0m\n";
 
     }
 

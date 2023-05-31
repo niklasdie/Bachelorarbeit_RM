@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
+#include "udp_buffer.hpp"
 #include "udp_sender.cpp"
 #include "shm.cpp"
 #include "timer.cpp"
@@ -40,9 +41,16 @@ private:
         }
 
         std::cout << "\t\033[1;41mReceived:\033[0m\n";
+        std::cout << "\t\033[1;32mBytes:        \033[0m" << bytes_transferred << "\n";
+
+        udp_buffer package = *(udp_buffer *) &recv_buffer;
+//        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
+
+        shm_.set_data((void*) &package.data, package.length);
+
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        shm_.set_data(&recv_buffer, bytes_transferred);
+//        shm_.set_data(&recv_buffer, bytes_transferred);
 
         ti.end();
 
@@ -57,9 +65,16 @@ private:
         }
 
         std::cout << "\t\033[1;41mReceived:\033[0m\n";
+        std::cout << "\t\033[1;32mBytes:        \033[0m" << bytes_transferred << "\n";
+
+        udp_buffer package = *(udp_buffer *) &recv_buffer;
+//        std::cout << "\t\033[1;32mPackage data:     \033[0m" << package << "\n";
+
+        shm_.set_data((void*) &package.data, package.length);
+
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        shm_.set_data(&recv_buffer, bytes_transferred);
+//        shm_.set_data(&recv_buffer, bytes_transferred);
 
         sender.send_data();
 

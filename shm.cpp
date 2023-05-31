@@ -6,8 +6,6 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <iostream>
 
-#include "udp_buffer.hpp"
-
 // header file of simulation
 #include "application_simulator.hpp"
 
