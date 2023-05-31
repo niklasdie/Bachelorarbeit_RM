@@ -3,11 +3,10 @@
 //
 
 #include <iostream>
-#include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
-#include "shm.hpp"
+#include "udp_buffer.hpp"
 #include "udp_sender.cpp"
 #include "shm.cpp"
 #include "timer.cpp"
@@ -24,6 +23,7 @@ struct udp_receiver {
     {
         socket.open(udp::v4());
         socket.bind(udp::endpoint(address::from_string(host_ip), port));
+        socket.set_option(boost::asio::socket_base::receive_buffer_size(1024));
     }
 
     ~udp_receiver()
@@ -32,17 +32,25 @@ struct udp_receiver {
     }
 
 private:
+
     void handle_receive(const boost::system::error_code &error, size_t bytes_transferred)
     {
         if (error) {
             std::cout << "Receive failed: " << error.message() << "\n";
             return;
         }
-        std::string message = std::string(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
-        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
-//        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes\033[0m\n";
 
-        shm_.set_data(message);
+        std::cout << "\t\033[1;41mReceived:\033[0m\n";
+        std::cout << "\t\033[1;32mBytes:        \033[0m" << bytes_transferred << "\n";
+
+        udp_buffer package = *(udp_buffer *) &recv_buffer;
+//        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
+
+        shm_.set_data((void*) &package.data, package.length);
+
+        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
+
+//        shm_.set_data(&recv_buffer, bytes_transferred);
 
         ti.end();
 
@@ -55,11 +63,18 @@ private:
             std::cout << "Receive failed: " << error.message() << "\n";
             return;
         }
-        std::string message = std::string(recv_buffer.begin(), recv_buffer.begin() + bytes_transferred);
-        std::cout << "\033[1;31mReceived: \033[0m" << message << "\n";
-//        std::cout << "\033[1;31mReceived " << bytes_transferred << " bytes\033[0m\n";
 
-        shm_.set_data(message);
+        std::cout << "\t\033[1;41mReceived:\033[0m\n";
+        std::cout << "\t\033[1;32mBytes:        \033[0m" << bytes_transferred << "\n";
+
+        udp_buffer package = *(udp_buffer *) &recv_buffer;
+//        std::cout << "\t\033[1;32mPackage data:     \033[0m" << package << "\n";
+
+        shm_.set_data((void*) &package.data, package.length);
+
+        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
+
+//        shm_.set_data(&recv_buffer, bytes_transferred);
 
         sender.send_data();
 
@@ -113,8 +128,8 @@ public:
 private:
     boost::asio::io_service io_service;
     udp::socket socket{io_service};
-    boost::array<char, 1024> recv_buffer;
     shm &shm_;
+    char recv_buffer[1460];
     std::string host_ip;
     udp_sender &sender;
     timer &ti;
