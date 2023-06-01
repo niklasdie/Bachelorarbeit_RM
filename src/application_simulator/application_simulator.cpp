@@ -7,6 +7,9 @@
 #include <iostream>
 
 #include "application_simulator.hpp"
+#include "../shm/shm_api.hpp"
+
+#include <math.h>
 
 using namespace boost::interprocess;
 
@@ -30,6 +33,11 @@ struct application_simulator
         (*shm_s).d = 1.1;
         (*shm_s).b = false;
         (*shm_s).c = 'a';
+        (*shm_s).innerStruct.i = 123;
+        (*shm_s).innerStruct.l = 555555;
+        (*shm_s).innerStruct.d = M_PI;
+        (*shm_s).innerStruct.b = false;
+        (*shm_s).innerStruct.c = 'z';
     };
 
     ~application_simulator()
@@ -50,6 +58,16 @@ public:
             (*shm_s).c = 'a';
         } else {
             (*shm_s).c++;
+        }
+        (*shm_s).innerStruct.data[((*shm_s).innerStruct.i) % 11] = (*shm_s).innerStruct.c;
+        (*shm_s).innerStruct.i++;
+        ++(*shm_s).innerStruct.l;
+        (*shm_s).innerStruct.d += 0.01;
+        (*shm_s).innerStruct.b = !(*shm_s).innerStruct.b;
+        if ((*shm_s).innerStruct.c == 'z') {
+            (*shm_s).innerStruct.c = 'a';
+        } else {
+            (*shm_s).innerStruct.c++;
         }
     }
 

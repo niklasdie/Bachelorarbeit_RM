@@ -16,19 +16,19 @@ set(USED_LIBS ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBR
 
 add_executable(
         rm_poc
-        main.cpp
-        shm_api.hpp
-        shm_api.cpp
-        shm.cpp
-        udp_sender.cpp
-        udp_receiver.cpp
-        timer.cpp
-        udp_buffer.hpp)
+        src/main.cpp
+        src/shm/shm_api.hpp
+        src/shm/shm_api.cpp
+        src/shm/shm.cpp
+        src/udp/udp_sender.cpp
+        src/udp/udp_receiver.cpp
+        src/util/timer.cpp
+        src/udp/udp_package.hpp)
 
 add_executable(
         application_simulator
-        application_simulator.cpp
-        application_simulator.hpp
+        src/application_simulator/application_simulator.cpp
+        src/application_simulator/application_simulator.hpp
 )
 target_link_libraries(rm_poc  ${USED_LIBS} librt.so)
 

@@ -13,11 +13,11 @@ struct inner_struct8 {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct inner_struct7 {
@@ -27,11 +27,11 @@ struct inner_struct7 {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct inner_struct6 {
@@ -41,11 +41,11 @@ struct inner_struct6 {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct inner_struct5 {
@@ -55,11 +55,11 @@ struct inner_struct5 {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct inner_struct4 {
@@ -69,11 +69,11 @@ struct inner_struct4 {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct inner_struct3 {
@@ -83,11 +83,11 @@ struct inner_struct3 {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct inner_struct2 {
@@ -97,11 +97,11 @@ struct inner_struct2 {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct inner_struct {
@@ -111,11 +111,11 @@ struct inner_struct {
     char data4;
     char data5;
     char data6;
-    int i2;
-    long l2;
-    double d2;
-    bool b2;
-    char c2;
+    int i;
+    long l;
+    double d;
+    bool b;
+    char c;
 };
 
 struct shm_struct {
@@ -141,7 +141,13 @@ static std::ostream &operator<<(std::ostream &os, const shm_struct &s) {
                s.l << " | " <<
                s.d << " | " <<
                s.b << " | " <<
-               s.c);
+               s.c << " | " <<
+               s.innerStruct.data << " | " <<
+               s.innerStruct.i << " | " <<
+               s.innerStruct.l << " | " <<
+               s.innerStruct.d << " | " <<
+               s.innerStruct.b << " | " <<
+               s.innerStruct.c);
 }
 
 #endif //SERVER_APPLICATION_SIMULATOR_HPP

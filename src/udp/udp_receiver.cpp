@@ -6,10 +6,10 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
-#include "udp_buffer.hpp"
+#include "udp_package.hpp"
 #include "udp_sender.cpp"
-#include "shm.cpp"
-#include "timer.cpp"
+#include "../shm/shm.cpp"
+#include "../util/timer.cpp"
 
 #define IPADDRESS "10.0.0.1" // "127.0.0.1"
 #define UDP_PORT 8080
@@ -43,7 +43,12 @@ private:
         std::cout << "\t\033[1;41mReceived:\033[0m\n";
         std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
 
-        udp_buffer package = *(udp_buffer *) &recv_buffer;
+//        std::vector<udp_buffer> buffer = *(std::vector<udp_buffer> *) &recv_buffer;
+//        for (udp_buffer package : buffer) {
+//            shm_.set_data(&package.data, package.offset, package.length);
+//        }
+
+        udp_package package = *(udp_package *) &recv_buffer;
 //        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 
         shm_.set_data(&package.data, package.offset, package.length);
@@ -65,9 +70,14 @@ private:
         std::cout << "\t\033[1;41mReceived:\033[0m\n";
         std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
 
-        udp_buffer package = *(udp_buffer *) &recv_buffer;
-        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
-        std::cout << "\t\033[1;31mINT data: \033[0m" << *(int*)&package.data << "\n";
+//        std::vector<udp_buffer> buffer = *(std::vector<udp_buffer> *) &recv_buffer;
+//        for (udp_buffer package : buffer) {
+//            shm_.set_data(&package.data, package.offset, package.length);
+//        }
+
+        udp_package package = *(udp_package *) &recv_buffer;
+//        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
+//        std::cout << "\t\033[1;31mINT data: \033[0m" << *(int*)&package.data << "\n";
 
         shm_.set_data(&package.data, package.offset, package.length);
 
@@ -75,6 +85,7 @@ private:
 
 //        shm_.set_data(&recv_buffer, bytes_transferred);
 
+//        sender.send_data((void *) &shm_.get_data_struct().data, sizeof(char[12]));
         sender.send_data();
 
         wait_and_send_back();
