@@ -41,16 +41,14 @@ private:
         }
 
         std::cout << "\t\033[1;41mReceived:\033[0m\n";
-        std::cout << "\t\033[1;32mBytes:        \033[0m" << bytes_transferred << "\n";
+        std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
 
         udp_buffer package = *(udp_buffer *) &recv_buffer;
-//        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
+//        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 
-        shm_.set_data((void*) &package.data, package.length);
+        shm_.set_data(&package.data, package.offset, package.length);
 
-        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
-
-//        shm_.set_data(&recv_buffer, bytes_transferred);
+        std::cout << "\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
         ti.end();
 
@@ -65,14 +63,15 @@ private:
         }
 
         std::cout << "\t\033[1;41mReceived:\033[0m\n";
-        std::cout << "\t\033[1;32mBytes:        \033[0m" << bytes_transferred << "\n";
+        std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
 
         udp_buffer package = *(udp_buffer *) &recv_buffer;
-//        std::cout << "\t\033[1;32mPackage data:     \033[0m" << package << "\n";
+        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
+        std::cout << "\t\033[1;31mINT data: \033[0m" << *(int*)&package.data << "\n";
 
-        shm_.set_data((void*) &package.data, package.length);
+        shm_.set_data(&package.data, package.offset, package.length);
 
-        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
+        std::cout << "\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
 //        shm_.set_data(&recv_buffer, bytes_transferred);
 

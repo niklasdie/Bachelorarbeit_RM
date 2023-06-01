@@ -21,8 +21,9 @@ public:
     virtual size_t get_size() = 0;
     virtual const char* get_name() = 0;
     virtual std::string get_data_bytes_as_string() = 0;
-    virtual shm_struct get_data_struct() = 0;
+    virtual shm_struct& get_data_struct() = 0;
     virtual bool set_data(void* start, size_t length) = 0;
+    virtual bool set_data(void* start, int offset, size_t length) = 0;
     virtual bool set_data(const std::string &data) = 0;
     virtual bool set_data(const shm_struct &data) = 0;
 
@@ -58,7 +59,7 @@ struct shm_o: shm
 
     ~shm_o()
     {
-        // deleting memory once is enough
+        /// deleting memory once is enough
 //        delete shm_s;
         shared_memory_object::remove(shm_name);
     }
@@ -67,14 +68,25 @@ public:
 
     bool set_data(void* start, size_t length) override
     {
+        while(in_use) {}
         in_use = true;
         std::memcpy(region.get_address(), start, length);
         in_use = false;
         return true;
     }
 
+    bool set_data(void* start, int offset, size_t length) override
+    {
+        while(in_use) {}
+        in_use = true;
+        std::memcpy((void *) (((char *) region.get_address()) + offset),  start, length);
+        in_use = false;
+        return true;
+    }
+
     bool set_data(const std::string &data) override
     {
+        while(in_use) {}
         in_use = true;
         char *mem = (char *) region.get_address();
         for (char c : data) {
@@ -87,6 +99,7 @@ public:
 
     bool set_data(const shm_struct &data) override
     {
+        while(in_use) {}
         in_use = true;
         std::memcpy(region.get_address(), &data, region.get_size());
         in_use = false;
@@ -111,15 +124,17 @@ public:
     std::string get_data_bytes_as_string() override
     {
         while(in_use) {}
+        in_use = true;
         char *mem = (char *) region.get_address();
         std::string s;//(region.get_address(), ((char*) region.get_address()) + region.get_size());
         for (std::size_t i = 0; i < region.get_size(); ++i) {
             s += *mem++;
         }
+        in_use = false;
         return s;
     }
 
-    shm_struct get_data_struct() override
+    shm_struct& get_data_struct() override
     {
         while(in_use) {}
         return *((shm_struct*) region.get_address());

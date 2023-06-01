@@ -47,13 +47,13 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_buffer package(shm_, 0, shm_.get_size());
+        udp_buffer package(shm_, 0, sizeof(shm_struct));
 
 //        std::cout << "\t\033[1;32msizeof(package): \033[0m" << sizeof(package) << "\n";
 //        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
 
         socket.send_to(boost::asio::buffer(
-                &package, sizeof(package)
+                &package, 12 /* offset and length */ + package.length
         ), destination_endpoint);
 
 //        socket.send_to(boost::asio::buffer(
@@ -66,10 +66,13 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_buffer package(shm_, ((char *) shm_.get_data()) - ((char *) source), length);
+        udp_buffer package(shm_,((char *) source) - ((char *) shm_.get_data()), length);
+
+        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
+        std::cout << "\t\033[1;32mPackage size: \033[0m" << sizeof(long) + sizeof(int) + length << "\n";
 
         socket.send_to(boost::asio::buffer(
-                &package, sizeof(package)
+                &package, 12 /* offset and length */  + length
         ), destination_endpoint);
 
     }

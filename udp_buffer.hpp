@@ -10,11 +10,13 @@
 struct udp_buffer {
     ptrdiff_t offset;
     int length;
-    unsigned char data[1444]; // 1444
+    char data[1444]; // 1444
 
     udp_buffer(shm &shm, ptrdiff_t offset, int length) : offset(offset), length(length)
     {
-        std::memcpy(&data[0], ((char *) shm.get_data()) + offset, length);
+        // TODO: length must be smaller than 1444-offset and bigger than 0
+        // TODO: offset must be bigger than 0 and smaller than 1443
+        std::memcpy((void*) &data[0],  (void*) (((char *) shm.get_data()) + offset), length);
     }
 
 };

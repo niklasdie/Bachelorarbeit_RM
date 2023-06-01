@@ -11,17 +11,18 @@
 // api
 #include "shm_api.cpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     if (argc != 3) {
         std::cerr << "Usage: <local ip> <destination ip>\n";
         return 1;
     }
 
     {
-    int port = 8080;
+        int port = 8080;
 
-    // shm name
-    const char* shm_name = "rm_shm";
+        // shm name
+        const char* shm_name = "rm_shm";
 
         // shm
         shm_o s(shm_name);
@@ -60,7 +61,8 @@ int main(int argc, char *argv[]) {
 //                std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
 //                std::cout << "\t\033[1;32mData shm:       \033[0m" << s.get_data_struct() << "\n";
                 ti.start();
-                client.send_data();
+                client.send_data((void *) &s.get_data_struct().i, sizeof(int));
+//                client.send_data();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             th.interrupt();
