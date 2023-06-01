@@ -9,7 +9,7 @@
 #include "application_simulator/application_simulator.cpp"
 
 // api
-#include "shm/shm_api.cpp"
+#include "api/shm_api.cpp"
 
 int main(int argc, char *argv[])
 {
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
             std::cout << "Start sending\n";
             for (int i = 0; i < 10; i++) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+//                std::this_thread::sleep_for(std::chrono::nanoseconds (1));
                 simulator.do_something();
 //                std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
 //                std::cout << "\t\033[1;32mData shm:       \033[0m" << s.get_data_struct() << "\n";
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             server2.interrupt();
         }
 
-        std::cout << "\033[1;33mData shm end: " << s.get_data_struct() << "\033[0m\n";
+        std::cout << "\n\033[1;33mData shm end: " << s.get_data_struct() << "\033[0m\n";
 
     }
 

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <boost/asio.hpp>
 
-#include "udp_package.hpp"
+#include "udp_payload.hpp"
 #include "../shm/shm.cpp"
 
 using boost::asio::ip::udp;
@@ -19,7 +19,7 @@ struct udp_sender
         std::string dest(dest_ip);
         std::cout << "Client started at " << dest << "\n";
         socket.open(udp::v4());
-        socket.set_option(boost::asio::socket_base::receive_buffer_size(1024));
+        socket.set_option(boost::asio::socket_base::send_buffer_size(1460));
         destination_endpoint = udp::endpoint(
             address::from_string(dest), // dest.append(":").append(std::to_string(port))
             port
@@ -30,9 +30,6 @@ struct udp_sender
     {
         socket.close();
     }
-
-    // TODO
-    /// Send segments of shm.
 
     // TODO
     /// Fill a buffer with data to send and send it at once cyclic
@@ -47,7 +44,7 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_package package(shm_, 0, sizeof(shm_struct));
+        udp_payload package(shm_, 0, sizeof(shm_struct));
 
 //        std::cout << "\t\033[1;32msizeof(package): \033[0m" << sizeof(package) << "\n";
 //        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
@@ -66,7 +63,7 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_package package(shm_, ((char *) source) - ((char *) shm_.get_data()), length);
+        udp_payload package(shm_, ((char *) source) - ((char *) shm_.get_data()), length);
 
 //        if (get_buffer_size() + 12 + length > 1444) {
             std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";

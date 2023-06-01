@@ -7,7 +7,6 @@
 #include <iostream>
 
 #include "application_simulator.hpp"
-#include "../shm/shm_api.hpp"
 
 #include <math.h>
 

@@ -5,8 +5,9 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
+#include <boost/thread.hpp>
 
-#include "udp_package.hpp"
+#include "udp_payload.hpp"
 #include "udp_sender.cpp"
 #include "../shm/shm.cpp"
 #include "../util/timer.cpp"
@@ -21,6 +22,9 @@ struct udp_receiver {
     udp_receiver(shm &shm, const char *local_ip, int port, udp_sender &sender, timer &ti)
             : shm_(shm), host_ip(local_ip), sender(sender), ti(ti)
     {
+        // TODO
+        io_service.wrap(&udp_receiver::handle_receive);
+
         socket.open(udp::v4());
         socket.bind(udp::endpoint(address::from_string(host_ip), port));
         socket.set_option(boost::asio::socket_base::receive_buffer_size(1024));
@@ -48,7 +52,7 @@ private:
 //            shm_.set_data(&package.data, package.offset, package.length);
 //        }
 
-        udp_package package = *(udp_package *) &recv_buffer;
+        udp_payload package = *(udp_payload *) &recv_buffer;
 //        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 
         shm_.set_data(&package.data, package.offset, package.length);
@@ -75,7 +79,7 @@ private:
 //            shm_.set_data(&package.data, package.offset, package.length);
 //        }
 
-        udp_package package = *(udp_package *) &recv_buffer;
+        udp_payload package = *(udp_payload *) &recv_buffer;
 //        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 //        std::cout << "\t\033[1;31mINT data: \033[0m" << *(int*)&package.data << "\n";
 
@@ -86,7 +90,7 @@ private:
 //        shm_.set_data(&recv_buffer, bytes_transferred);
 
 //        sender.send_data((void *) &shm_.get_data_struct().data, sizeof(char[12]));
-        sender.send_data();
+//        sender.send_data();
 
         wait_and_send_back();
     }
