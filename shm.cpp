@@ -79,7 +79,7 @@ public:
     {
         while(in_use) {}
         in_use = true;
-        std::memcpy((void *) (((char *) region.get_address()) + offset),  (void *) (((char *) start) + offset), length);
+        std::memcpy((void *) (((char *) region.get_address()) + offset),  start, length);
         in_use = false;
         return true;
     }
