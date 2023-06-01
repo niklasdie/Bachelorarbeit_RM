@@ -2,17 +2,17 @@
 // Created by dev on 30.05.23.
 //
 
-#ifndef SERVER_UDP_BUFFER_HPP
-#define SERVER_UDP_BUFFER_HPP
+#ifndef SERVER_UDP_PACKAGE_HPP
+#define SERVER_UDP_PACKAGE_HPP
 
-#include "shm.cpp"
+#include "../shm/shm.cpp"
 
-struct udp_buffer {
+struct udp_package {
     ptrdiff_t offset;
     int length;
     char data[1444]; // 1444
 
-    udp_buffer(shm &shm, ptrdiff_t offset, int length) : offset(offset), length(length)
+    udp_package(shm &shm, ptrdiff_t offset, int length) : offset(offset), length(length)
     {
         // TODO: length must be smaller than 1444-offset and bigger than 0
         // TODO: offset must be bigger than 0 and smaller than 1443
@@ -28,10 +28,10 @@ static std::ostream &operator<<(std::ostream &os, const unsigned char data[]) {
     return os;
 }
 
-static std::ostream &operator<<(std::ostream &os, const udp_buffer &b) {
+static std::ostream &operator<<(std::ostream &os, const udp_package &b) {
     return (os << b.offset << " | " <<
             b.length << " | " <<
             b.data);
 }
 
-#endif //SERVER_UDP_BUFFER_HPP
+#endif //SERVER_UDP_PACKAGE_HPP

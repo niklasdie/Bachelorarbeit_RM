@@ -6,10 +6,10 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#include "application_simulator.cpp"
+#include "application_simulator/application_simulator.cpp"
 
 // api
-#include "shm_api.cpp"
+#include "shm/shm_api.cpp"
 
 int main(int argc, char *argv[])
 {
@@ -27,10 +27,7 @@ int main(int argc, char *argv[])
         // shm
         shm_o s(shm_name);
 
-//    s.set_data("Hello World");
-//    std::cout << "Data: " << s.get_data_struct() << "\n";
-
-        // Timer
+        // timer
         timer ti{};
 
         // UDP
@@ -40,8 +37,9 @@ int main(int argc, char *argv[])
         std::cout << "Thread started" << std::endl;
 
         // api
-//    shm_api api(shm_o, client);
+        set_udp_sender(&client);
 
+        // simulated application
         application_simulator simulator(shm_name);
 
         // send first package
@@ -61,7 +59,9 @@ int main(int argc, char *argv[])
 //                std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
 //                std::cout << "\t\033[1;32mData shm:       \033[0m" << s.get_data_struct() << "\n";
                 ti.start();
-                client.send_data((void *) &s.get_data_struct().i, sizeof(int));
+//                rm_in((void *) &s.get_data_struct().data, sizeof(char[12]));
+                rm_in();
+//                client.send_data((void *) &s.get_data_struct().data, sizeof(char[12]));
 //                client.send_data();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(500));

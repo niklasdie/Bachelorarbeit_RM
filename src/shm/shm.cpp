@@ -7,7 +7,7 @@
 #include <iostream>
 
 // header file of simulation
-#include "application_simulator.hpp"
+#include "../application_simulator/application_simulator.hpp"
 
 #ifndef SHM
 #define SHM

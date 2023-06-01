@@ -5,8 +5,8 @@
 #include <iostream>
 #include <boost/asio.hpp>
 
-#include "udp_buffer.hpp"
-#include "shm.cpp"
+#include "udp_package.hpp"
+#include "../shm/shm.cpp"
 
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
@@ -47,7 +47,7 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_buffer package(shm_, 0, sizeof(shm_struct));
+        udp_package package(shm_, 0, sizeof(shm_struct));
 
 //        std::cout << "\t\033[1;32msizeof(package): \033[0m" << sizeof(package) << "\n";
 //        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
@@ -66,18 +66,32 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_buffer package(shm_,((char *) source) - ((char *) shm_.get_data()), length);
+        udp_package package(shm_, ((char *) source) - ((char *) shm_.get_data()), length);
 
-        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
-        std::cout << "\t\033[1;32mPackage size: \033[0m" << sizeof(long) + sizeof(int) + length << "\n";
+//        if (get_buffer_size() + 12 + length > 1444) {
+            std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
+            std::cout << "\t\033[1;32mPackage size: \033[0m" << sizeof(long) + sizeof(int) + length << "\n";
 
-        socket.send_to(boost::asio::buffer(
-                &package, 12 /* offset and length */  + length
-        ), destination_endpoint);
-
+            socket.send_to(boost::asio::buffer(
+                    &package, 12 /* offset and length */  + length
+            ), destination_endpoint);
+//        } else {
+//            buffer.push_back(package);
+//        }
     }
 
 private:
+
+//    size_t get_buffer_size()
+//    {
+//        size_t size = 0;
+//        for (udp_buffer package : buffer) {
+//            size += 12 + package.length;
+//        }
+//        return size;
+//    }
+//
+//    std::vector<udp_buffer> buffer;
     boost::asio::io_context io_context;
     udp::socket socket;
     udp::endpoint destination_endpoint;
