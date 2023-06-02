@@ -9,6 +9,7 @@
 #include "../udp/udp_payload.hpp"
 
 struct udp_buffer {
+    char ip[4];
     int count;
     int end_of_data;
     char data[1456]; // 1456
@@ -19,7 +20,7 @@ struct udp_buffer {
 
     void add_payload(udp_payload &payload)
     {
-        std::memcpy(&data[0] + end_of_data, &payload, 12 + payload.length);
+        std::memcpy(&data[0] + end_of_data, &payload, 28 + payload.length);
         end_of_data += payload.length;
     }
 

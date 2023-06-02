@@ -13,17 +13,22 @@ using boost::asio::ip::address;
 
 struct udp_sender
 {
-    udp_sender(shm &shm, const char *dest_ip, int port)
-        : shm_(shm), socket(udp::socket(io_context))
+    udp_sender(boost::asio::io_service &io_service, shm &shm, char local_ip_bytes[4], const char *multicast_ip, int port)
+        : io_service(io_service), shm_(shm), socket(udp::socket(io_service))
     {
-        std::string dest(dest_ip);
-        std::cout << "Client started at " << dest << "\n";
+        std::cout << "Client started\n";
         socket.open(udp::v4());
         socket.set_option(boost::asio::socket_base::send_buffer_size(1460));
-        destination_endpoint = udp::endpoint(
-            address::from_string(dest), // dest.append(":").append(std::to_string(port))
+        socket.set_option(udp::socket::reuse_address(true));
+//        socket.set_option(boost::asio::socket_base::broadcast(true));
+        broadcast_endpoint = udp::endpoint(
+            address::from_string(multicast_ip),
             port
         );
+//        destination_endpoint = udp::endpoint(
+//                boost::asio::ip::address_v4::broadcast(),
+//                port
+//        );
     }
 
     ~udp_sender()
@@ -44,18 +49,14 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_payload package(shm_, 0, sizeof(shm_struct));
+        udp_payload package(local_ip_bytes_, shm_, 0, sizeof(shm_struct));
 
-//        std::cout << "\t\033[1;32msizeof(package): \033[0m" << sizeof(package) << "\n";
-//        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
+        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
+        std::cout << "\t\033[1;32mPackage size: \033[0m" << 28 + package.length << "\n";
 
         socket.send_to(boost::asio::buffer(
-                &package, 12 /* offset and length */ + package.length
-        ), destination_endpoint);
-
-//        socket.send_to(boost::asio::buffer(
-//            shm_.get_data(), shm_.get_size()
-//        ), destination_endpoint);
+                &package, 28 /* offset and length */ + package.length
+        ), broadcast_endpoint);
     }
 
     void send_data(void *source, int length)
@@ -63,15 +64,15 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_payload package(shm_, ((char *) source) - ((char *) shm_.get_data()), length);
+        udp_payload package(local_ip_bytes_, shm_, ((char *) source) - ((char *) shm_.get_data()), length);
 
 //        if (get_buffer_size() + 12 + length > 1444) {
             std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
-            std::cout << "\t\033[1;32mPackage size: \033[0m" << sizeof(long) + sizeof(int) + length << "\n";
+            std::cout << "\t\033[1;32mPackage size: \033[0m" << 28 + length << "\n";
 
             socket.send_to(boost::asio::buffer(
-                    &package, 12 /* offset and length */  + length
-            ), destination_endpoint);
+                    &package, 28 /* offset and length */  + length
+            ), broadcast_endpoint);
 //        } else {
 //            buffer.push_back(package);
 //        }
@@ -89,8 +90,9 @@ private:
 //    }
 //
 //    std::vector<udp_buffer> buffer;
-    boost::asio::io_context io_context;
+    boost::asio::io_service &io_service;
     udp::socket socket;
-    udp::endpoint destination_endpoint;
+    udp::endpoint broadcast_endpoint;
     shm& shm_;
+    char local_ip_bytes_[4];
 };
