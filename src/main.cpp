@@ -32,8 +32,7 @@ int main(int argc, char *argv[])
 
         // UDP
         udp_sender client(s, argv[2], port);
-        udp_receiver server(s, argv[1], port, client, ti);
-        boost::thread th(boost::bind(&udp_receiver::receive, &server));
+        udp_receiver server(s, argv[1], port, client, ti, false);
         std::cout << "Thread started" << std::endl;
 
         // api
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
             std::cout << "Start sending\n";
             for (int i = 0; i < 10; i++) {
-//                std::this_thread::sleep_for(std::chrono::nanoseconds (1));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 simulator.do_something();
 //                std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
 //                std::cout << "\t\033[1;32mData shm:       \033[0m" << s.get_data_struct() << "\n";
@@ -65,24 +64,18 @@ int main(int argc, char *argv[])
 //                client.send_data();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            th.interrupt();
-            server.interrupt();
         } else { // Receive Mode
             ti.clear();
             std::cout << "\033[1;42mReceive Mode\033[0m\n";
             std::cout << "Old thread stopped\n";
-            th.interrupt();
             server.interrupt();
-            udp_receiver server2(s, argv[1], port, client, ti);
-            boost::thread th2(boost::bind(&udp_receiver::receive_and_send_back, &server2));
+            udp_receiver server2(s, argv[1], port, client, ti, true);
             std::cout << "Thread started\n";
             std::cout << "\t\033[1;32mData simulator before: \033[0m" << *simulator.shm_s << "\n";
             std::cout << "\t\033[1;32mData shm before:       \033[0m" << s.get_data_struct() << "\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(3000));
             std::cout << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s << "\n";
             std::cout << "\t\033[1;31mData shm after:       \033[0m" << s.get_data_struct() << "\n";
-            th2.interrupt();
-            server2.interrupt();
         }
 
         std::cout << "\n\033[1;33mData shm end: " << s.get_data_struct() << "\033[0m\n";

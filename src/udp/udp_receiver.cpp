@@ -19,19 +19,23 @@ using boost::asio::ip::udp;
 using boost::asio::ip::address;
 
 struct udp_receiver {
-    udp_receiver(shm &shm, const char *local_ip, int port, udp_sender &sender, timer &ti)
+    udp_receiver(shm &shm, const char *local_ip, int port, udp_sender &sender, timer &ti, bool resend)
             : shm_(shm), host_ip(local_ip), sender(sender), ti(ti)
     {
-        // TODO
-        io_service.wrap(&udp_receiver::handle_receive);
-
         socket.open(udp::v4());
         socket.bind(udp::endpoint(address::from_string(host_ip), port));
         socket.set_option(boost::asio::socket_base::receive_buffer_size(1024));
+        th = boost::thread(boost::bind(&udp_receiver::run_service, this));
+        if(resend) {
+            start_receive_and_send_back();
+        } else {
+            start_receive();
+        }
     }
 
     ~udp_receiver()
     {
+        th.interrupt();
         socket.close();
     }
 
@@ -61,7 +65,7 @@ private:
 
         ti.end();
 
-        wait();
+        start_receive();
     }
 
     void handle_receive_and_send_back(const boost::system::error_code &error, size_t bytes_transferred)
@@ -90,12 +94,12 @@ private:
 //        shm_.set_data(&recv_buffer, bytes_transferred);
 
 //        sender.send_data((void *) &shm_.get_data_struct().data, sizeof(char[12]));
-//        sender.send_data();
+        sender.send_data();
 
-        wait_and_send_back();
+        start_receive_and_send_back();
     }
 
-    void wait()
+    void start_receive()
     {
         socket.async_receive(boost::asio::buffer(recv_buffer),
                              boost::bind(
@@ -107,7 +111,7 @@ private:
         );
     }
 
-    void wait_and_send_back()
+    void start_receive_and_send_back()
     {
         socket.async_receive(boost::asio::buffer(recv_buffer),
                              boost::bind(
@@ -120,28 +124,22 @@ private:
     }
 
 public:
-    void receive()
+    void run_service()
     {
-        wait();
-
-        io_service.run();
-    }
-
-    void receive_and_send_back()
-    {
-        wait_and_send_back();
-
         io_service.run();
     }
 
     void interrupt()
     {
+        th.interrupt();
         socket.close();
     }
 
 private:
     boost::asio::io_service io_service;
     udp::socket socket{io_service};
+    boost::thread th;
+//    boost::asio::strand strand;
     shm &shm_;
     char recv_buffer[1460];
     std::string host_ip;
