@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
         // api
         set_udp_sender(&sender);
+        set_shm(&shm);
 
         // simulated application
         application_simulator simulator(shm_name);
@@ -109,5 +110,6 @@ int main(int argc, char *argv[])
 
     }
 
+    stop_rm_daemon();
     return 0;
 }

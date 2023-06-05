@@ -28,12 +28,11 @@ struct udp_receiver
         socket.open(udp::v4());
         socket.set_option(udp::socket::reuse_address(true));
         socket.bind(udp::endpoint(address::from_string(broadcast_ip), port));
-
-        std::cout << socket.local_endpoint() << "\n";
 //        socket.bind(udp::endpoint(boost::asio::ip::address_v4::any(), port));
 
         socket.set_option(boost::asio::socket_base::receive_buffer_size(1024));
         th = boost::thread(boost::bind(&udp_receiver::run_service, this));
+
         if(resend) {
             start_receive_and_resend();
         } else {

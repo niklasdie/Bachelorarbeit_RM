@@ -5,10 +5,22 @@
 #include "../udp/udp_receiver.cpp"
 
 static udp_sender *udp_sender_;
+static shm_o *shm_;
 
 static void set_udp_sender(udp_sender *sender)
 {
     udp_sender_ = sender;
+}
+
+static void set_shm(shm_o *shm)
+{
+    shm_ = shm;
+}
+
+static void stop_rm_daemon()
+{
+    shm_->shm_o::~shm_o();
+    exit(0);
 }
 
 /// Notify rm daemon of a change so that the data can be synced between all nodes.

@@ -8,6 +8,9 @@
 /// When the rm daemon is started this api can be used to notify the daemon of a change in the shm.
 /// Then the daemon immediately synchronises the shm.
 
+/// Notify rm daemon to end work.
+static void stop_rm_daemon();
+
 /// Notify rm daemon of a change so that the data can be synced between all nodes.
 static void rm_in();
 
