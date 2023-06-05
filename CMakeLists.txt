@@ -17,13 +17,14 @@ set(USED_LIBS ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBR
 add_executable(
         rm_poc
         src/main.cpp
-        src/shm/shm_api.hpp
-        src/shm/shm_api.cpp
         src/shm/shm.cpp
+        src/api/shm_api.hpp
+        src/api/shm_api.cpp
         src/udp/udp_sender.cpp
         src/udp/udp_receiver.cpp
-        src/util/timer.cpp
-        src/udp/udp_package.hpp)
+        src/udp/udp_payload.hpp
+        src/udp/udp_buffer.hpp
+        src/util/timer.cpp)
 
 add_executable(
         application_simulator
