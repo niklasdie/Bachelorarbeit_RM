@@ -39,7 +39,7 @@ struct udp_receiver
             start_receive();
         }
 
-        std::cout << "UDP receiver started\n";
+        BOOST_LOG_TRIVIAL(info) << "UDP receiver started";
     }
 
     ~udp_receiver()
@@ -55,28 +55,22 @@ private:
     void handle_receive(const boost::system::error_code &error, size_t bytes_transferred)
     {
         if (error) {
-            std::cout << "Receive failed: " << error.message() << "\n";
+            BOOST_LOG_TRIVIAL(error) << "Receive failed: " << error.message();
             return;
         }
 
-//        std::vector<udp_buffer> buffer = *(std::vector<udp_buffer> *) &recv_buffer;
-//        for (udp_buffer package : buffer) {
-//            shm_.set_data(&package.data, package.offset, package.length);
-//        }
-
         udp_payload packet = *(udp_payload *) &recv_buffer;
-//        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 
         if (std::memcmp(local_ip_bytes_, packet.src_ip, 4) != 0) {
-            std::cout << "\t\033[1;41mReceived:\033[0m\n";
-            std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
-
-            std::cout << "\t\033[1;31mReceived ip:     \033[0m";
-            print_ip(packet.src_ip);
 
             shm_.set_data(&packet.data, packet.offset, packet.length);
 
-            std::cout << "\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
+            BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
+                                     << "\n\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct()
+                                     << "\n\t\033[1;31mBytes:        \033[0m" << bytes_transferred
+                                     << "\n\t\033[1;31mReceived ip:  \033[0m" << ip_to_string(packet.src_ip)
+                                     << "\n\t\033[1;31mPackage data: \033[0m" << packet
+                                     << "\n\t\033[1;31mPackage size: \033[0m" << 28 + packet.length;
 
             ti.end();
         }
@@ -87,31 +81,22 @@ private:
     void handle_receive_and_send_back(const boost::system::error_code &error, size_t bytes_transferred)
     {
         if (error) {
-            std::cout << "Receive failed: " << error.message() << "\n";
+            BOOST_LOG_TRIVIAL(error) << "Receive failed: " << error.message();
             return;
         }
 
-//        std::vector<udp_buffer> buffer = *(std::vector<udp_buffer> *) &recv_buffer;
-//        for (udp_buffer package : buffer) {
-//            shm_.set_data(&package.data, package.offset, package.length);
-//        }
-
         udp_payload packet = *(udp_payload *) &recv_buffer;
-//        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
-//        std::cout << "\t\033[1;31mINT data: \033[0m" << *(int*)&package.data << "\n";
 
         if (std::memcmp(local_ip_bytes_, packet.src_ip, 4) != 0) {
-            std::cout << "\t\033[1;41mReceived:\033[0m\n";
-            std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
-
-            std::cout << "\t\033[1;31mReceived ip:     \033[0m";
-            print_ip(packet.src_ip);
 
             shm_.set_data(&packet.data, packet.offset, packet.length);
 
-            std::cout << "\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
-
-//        shm_.set_data(&recv_buffer, bytes_transferred);
+            BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
+                                     << "\n\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct()
+                                     << "\n\t\033[1;31mBytes:        \033[0m" << bytes_transferred
+                                     << "\n\t\033[1;31mReceived ip:  \033[0m" << ip_to_string(packet.src_ip)
+                                     << "\n\t\033[1;31mPackage data: \033[0m" << packet
+                                     << "\n\t\033[1;31mPackage size: \033[0m" << 28 + packet.length;
 
 //        sender.send_data((void *) &shm_.get_data_struct().data, sizeof(char[12]));
             sender.send_data();

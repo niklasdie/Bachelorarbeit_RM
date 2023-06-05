@@ -11,8 +11,8 @@
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
 
-static void print_ip(char ip[4]);
-static void print_ip(const char ip[4]);
+static std::string ip_to_string(char ip[4]);
+static std::string ip_to_string(const char ip[4]);
 
 struct udp_sender
 {
@@ -34,7 +34,7 @@ struct udp_sender
 //                port
 //        );
 
-        std::cout << "UDP sender started\n";
+        BOOST_LOG_TRIVIAL(info) << "UDP sender started";
     }
 
     ~udp_sender()
@@ -52,53 +52,36 @@ struct udp_sender
 
     void send_data()
     {
-        std::cout << "\t\033[1;42mSent:\033[0m\n";
-        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
-
-        std::cout << "\t\033[1;32mSend ip:     \033[0m";
-
         udp_payload packet(local_ip_bytes_, shm_, 0, sizeof(shm_struct));
-        print_ip(packet.src_ip);
 
-        std::cout << "\t\033[1;32mPackage data: \033[0m" << packet << "\n";
-        std::cout << "\t\033[1;32mPackage size: \033[0m" << 28 + packet.length << "\n";
+        BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
+                                 << "\n\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;32mSend ip:      \033[0m" << ip_to_string(packet.src_ip)
+                                 << "\n\t\033[1;32mPackage data: \033[0m" << packet
+                                 << "\n\t\033[1;32mPackage size: \033[0m" << 28 + packet.length;
 
         socket.send_to(boost::asio::buffer(
-                &packet, 28 /* offset and length */ + packet.length
+                &packet, 28 /* ip, offset and length */ + packet.length
         ), broadcast_endpoint);
     }
 
     void send_data(void *source, int length)
     {
-        std::cout << "\t\033[1;42mSent:\033[0m\n";
-        std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
-
         udp_payload packet(local_ip_bytes_, shm_, ((char *) source) - ((char *) shm_.get_data()), length);
 
-//        if (get_buffer_size() + 12 + length > 1444) {
-            std::cout << "\t\033[1;32mPackage data: \033[0m" << packet << "\n";
-            std::cout << "\t\033[1;32mPackage size: \033[0m" << 28 + length << "\n";
+        BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
+                                 << "\n\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;32mSend ip:      \033[0m" << ip_to_string(packet.src_ip)
+                                 << "\n\t\033[1;32mPackage data: \033[0m" << packet
+                                 << "\n\t\033[1;32mPackage size: \033[0m" << 28 + packet.length;
 
-            socket.send_to(boost::asio::buffer(
-                    &packet, 28 /* offset and length */  + length
-            ), broadcast_endpoint);
-//        } else {
-//            buffer.push_back(package);
-//        }
+        socket.send_to(boost::asio::buffer(
+                &packet, 28 /* ip, offset and length */  + length
+        ), broadcast_endpoint);
     }
 
 private:
 
-//    size_t get_buffer_size()
-//    {
-//        size_t size = 0;
-//        for (udp_buffer package : buffer) {
-//            size += 12 + package.length;
-//        }
-//        return size;
-//    }
-//
-//    std::vector<udp_buffer> buffer;
     boost::asio::io_service &io_service;
     udp::socket socket{io_service};
     udp::endpoint broadcast_endpoint;
@@ -106,12 +89,16 @@ private:
     char local_ip_bytes_[4];
 };
 
-static void print_ip(char ip[4])
+static std::string ip_to_string(char ip[4])
 {
-    std::cout << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3] << "\n";
+    std::stringstream ss;
+    ss << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3];
+    return ss.str();
 }
 
-static void print_ip(const char ip[4])
+static std::string ip_to_string(const char ip[4])
 {
-    std::cout << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3] << "\n";
+    std::stringstream ss;
+    ss << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3];
+    return ss.str();
 }

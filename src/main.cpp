@@ -5,6 +5,19 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/filter_parser.hpp>
+#include <boost/log/utility/setup/formatter_parser.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
 
 #include "application_simulator/application_simulator.cpp"
 
@@ -13,12 +26,56 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 4) {
-        std::cerr << "Usage: <local ip> <port> <shm_name>\n";
+    if (!(argc != 4 | argc != 6)) {
+        std::cerr << "Usage: <local ip> <port> <shm_name> (-log [trace, debug, info, warning, error])\n";
         return 1;
     }
-
     {
+        // logger
+        boost::log::add_file_log
+        (
+                boost::log::keywords::file_name = "log.log",
+                boost::log::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%"
+        );
+        boost::log::add_console_log
+        (
+                std::cout,
+                boost::log::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%"
+        );
+        if (argc > 5 && strcmp(argv[4], "-log") == 0) {
+            if (strcmp(argv[5], "trace") == 0) {
+                boost::log::core::get()->set_filter
+                        (
+                                boost::log::trivial::severity >= boost::log::trivial::trace
+                        );
+            } else if (strcmp(argv[5], "debug") == 0) {
+                boost::log::core::get()->set_filter
+                        (
+                                boost::log::trivial::severity >= boost::log::trivial::debug
+                        );
+            } else if (strcmp(argv[5], "info") == 0) {
+                boost::log::core::get()->set_filter
+                        (
+                                boost::log::trivial::severity >= boost::log::trivial::info
+                        );
+            } else if (strcmp(argv[5], "warning") == 0) {
+                boost::log::core::get()->set_filter
+                        (
+                                boost::log::trivial::severity >= boost::log::trivial::warning
+                        );
+            } else if (strcmp(argv[5], "error") == 0) {
+                boost::log::core::get()->set_filter
+                        (
+                                boost::log::trivial::severity >= boost::log::trivial::error
+                        );
+            }
+        } else {
+            boost::log::core::get()->set_filter
+                    (
+                            boost::log::trivial::severity >= boost::log::trivial::warning
+                    );
+        }
+
         // local ip to bytes
         const char* local_ip = argv[1];
         char local_ip_bytes[4];
@@ -50,7 +107,6 @@ int main(int argc, char *argv[])
         boost::asio::io_service io_service;
         udp_sender sender(io_service, shm, local_ip_bytes, broadcast_ip, port);
         udp_receiver receiver(io_service, shm, local_ip_bytes, broadcast_ip, port, sender, ti, false);
-        std::cout << "Thread started" << std::endl;
 
         // api
         set_udp_sender(&sender);
@@ -67,46 +123,42 @@ int main(int argc, char *argv[])
 
         if (ti.end_.size() == 0) { // Send Mode
             ti.clear();
-            std::cout << "\033[1;42mSend Mode\033[0m\n";
+            BOOST_LOG_TRIVIAL(info) << "\033[1;42mSend Mode\033[0m";
 
             // wait for Receive Mode to set up
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            std::cout << "Start sending\n";
+            BOOST_LOG_TRIVIAL(debug) << "Start sending";
 
             for (int i = 0; i < 10; i++) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 simulator.do_something();
-//                std::cout << "\t\033[1;32mData simulator: \033[0m" << *simulator.shm_s << "\n";
-//                std::cout << "\t\033[1;32mData shm:       \033[0m" << s.get_data_struct() << "\n";
                 ti.start();
 //                rm_in((void *) &s.get_data_struct().data, sizeof(char[12]));
                 rm_in();
-//                client.send_data((void *) &s.get_data_struct().data, sizeof(char[12]));
-//                client.send_data();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         } else { // Receive Mode
             ti.clear();
-            std::cout << "\033[1;42mReceive Mode\033[0m\n";
+            BOOST_LOG_TRIVIAL(info) << "\033[1;42mReceive Mode\033[0m";
 
             // change to receive and resend all packages
             receiver.change_to_receive_and_resend();
-            std::cout << "Changed to receive and resend\n";
+            BOOST_LOG_TRIVIAL(debug) << "Changed to receive and resend";
 
             // print current state of shm before all packages
-            std::cout << "\t\033[1;32mData simulator before: \033[0m" << *simulator.shm_s << "\n";
-            std::cout << "\t\033[1;32mData shm before:       \033[0m" << shm.get_data_struct() << "\n";
+            BOOST_LOG_TRIVIAL(debug) << "\t\033[1;32mData simulator before: \033[0m" << *simulator.shm_s;
+            BOOST_LOG_TRIVIAL(debug) << "\t\033[1;32mData shm before:       \033[0m" << shm.get_data_struct();
 
             // wait for all packages to arrive
             std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
             // print current state of shm after all packages
-            std::cout << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s << "\n";
-            std::cout << "\t\033[1;31mData shm after:       \033[0m" << shm.get_data_struct() << "\n";
+            BOOST_LOG_TRIVIAL(debug) << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s;
+            BOOST_LOG_TRIVIAL(debug) << "\t\033[1;31mData shm after:       \033[0m" << shm.get_data_struct();
         }
 
         // print final state of shm
-        std::cout << "\n\033[1;33mData shm end: " << shm.get_data_struct() << "\033[0m\n";
+        BOOST_LOG_TRIVIAL(info) << "\033[1;33mData shm end: " << shm.get_data_struct() << "\033[0m";
 
     }
 
