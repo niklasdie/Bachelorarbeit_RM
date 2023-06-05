@@ -11,11 +11,6 @@
 // api
 #include "api/shm_api.cpp"
 
-void print_ip(char ip[4])
-{
-    std::cout << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3] << "\n";
-}
-
 int main(int argc, char *argv[])
 {
     if (argc != 4) {
@@ -31,10 +26,8 @@ int main(int argc, char *argv[])
         std::string tmp;
         for (size_t i = 0; i < sizeof(local_ip_bytes); ++i) {
             std::getline(ip, tmp, '.');
-            std::cout << stoi(tmp) << "\n";
             local_ip_bytes[i] = (char) stoi(tmp);
         }
-        print_ip(local_ip_bytes);
 
         const char* multicast_ip = "224.0.0.1";
 

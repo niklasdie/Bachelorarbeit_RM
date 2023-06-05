@@ -16,7 +16,8 @@ struct udp_sender
     udp_sender(boost::asio::io_service &io_service, shm &shm, char local_ip_bytes[4], const char *multicast_ip, int port)
         : io_service(io_service), shm_(shm), socket(udp::socket(io_service))
     {
-        std::cout << "Client started\n";
+        std::memcpy(local_ip_bytes_, local_ip_bytes, 4);
+
         socket.open(udp::v4());
         socket.set_option(boost::asio::socket_base::send_buffer_size(1460));
         socket.set_option(udp::socket::reuse_address(true));
@@ -29,6 +30,8 @@ struct udp_sender
 //                boost::asio::ip::address_v4::broadcast(),
 //                port
 //        );
+
+        std::cout << "UDP sender started\n";
     }
 
     ~udp_sender()

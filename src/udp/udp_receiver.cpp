@@ -18,11 +18,16 @@
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
 
+static void print_ip(char ip[4]);
+static void print_ip(const char ip[4]);
+
 struct udp_receiver
 {
     udp_receiver(boost::asio::io_service &io_service, shm &shm, char local_ip_bytes[4], const char *multicast_ip, int port, udp_sender &sender, timer &ti, bool resend)
             : io_service(io_service), shm_(shm), sender(sender), ti(ti)
     {
+        std::memcpy(local_ip_bytes_, local_ip_bytes, 4);
+
         socket.open(udp::v4());
         socket.set_option(udp::socket::reuse_address(true));
         socket.bind(udp::endpoint(address::from_string(multicast_ip), port));
@@ -42,6 +47,8 @@ struct udp_receiver
         } else {
             start_receive();
         }
+
+        std::cout << "UDP receiver started\n";
     }
 
     ~udp_receiver()
@@ -61,9 +68,6 @@ private:
             return;
         }
 
-        std::cout << "\t\033[1;41mReceived:\033[0m\n";
-        std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
-
 //        std::vector<udp_buffer> buffer = *(std::vector<udp_buffer> *) &recv_buffer;
 //        for (udp_buffer package : buffer) {
 //            shm_.set_data(&package.data, package.offset, package.length);
@@ -72,8 +76,16 @@ private:
         udp_payload package = *(udp_payload *) &recv_buffer;
 //        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 
+//        std::cout << "Package IP: ";
+//        print_ip(package.src_ip);
+//
+//        std::cout << "Local IP: ";
+//        print_ip(local_ip_bytes_);
 
-        if (strcmp(local_ip_bytes_, package.src_ip)) {
+        if (std::memcmp(local_ip_bytes_, package.src_ip, 4) != 0) {
+            std::cout << "\t\033[1;41mReceived:\033[0m\n";
+            std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
+
             shm_.set_data(&package.data, package.offset, package.length);
 
             std::cout << "\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
@@ -91,9 +103,6 @@ private:
             return;
         }
 
-        std::cout << "\t\033[1;41mReceived:\033[0m\n";
-        std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
-
 //        std::vector<udp_buffer> buffer = *(std::vector<udp_buffer> *) &recv_buffer;
 //        for (udp_buffer package : buffer) {
 //            shm_.set_data(&package.data, package.offset, package.length);
@@ -103,7 +112,17 @@ private:
 //        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 //        std::cout << "\t\033[1;31mINT data: \033[0m" << *(int*)&package.data << "\n";
 
-        if (strcmp(local_ip_bytes_, package.src_ip)) {
+//        std::cout << "Package IP: ";
+//        print_ip(package.src_ip);
+//
+//        std::cout << "Local IP: ";
+//        print_ip(local_ip_bytes_);
+
+
+        if (std::memcmp(local_ip_bytes_, package.src_ip, 4) != 0) {
+            std::cout << "\t\033[1;41mReceived:\033[0m\n";
+            std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
+
             shm_.set_data(&package.data, package.offset, package.length);
 
             std::cout << "\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
@@ -146,16 +165,6 @@ private:
         io_service.run();
     }
 
-    void print_ip(char ip[4])
-    {
-        std::cout << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3] << "\n";
-    }
-
-    void print_ip(const char ip[4])
-    {
-        std::cout << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3] << "\n";
-    }
-
 public:
 
     void change_to_receive_and_resend()
@@ -188,3 +197,14 @@ private:
     char local_ip_bytes_[4];
     timer &ti;
 };
+
+static void print_ip(char ip[4])
+{
+    std::cout << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3] << "\n";
+}
+
+static void print_ip(const char ip[4])
+{
+    std::cout << (unsigned int) ip[0] << "." << (unsigned int) ip[1] << "." << (unsigned int) ip[2] << "." << (unsigned int) ip[3] << "\n";
+}
+
