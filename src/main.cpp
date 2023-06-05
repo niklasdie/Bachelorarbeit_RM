@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
     }
 
     {
+        // local ip to bytes
         const char* local_ip = argv[1];
-
         char local_ip_bytes[4];
         std::istringstream ip(local_ip);
         std::string tmp;
@@ -29,8 +29,12 @@ int main(int argc, char *argv[])
             local_ip_bytes[i] = (char) stoi(tmp);
         }
 
-        const char* multicast_ip = "224.0.0.1";
+        // local ip to broadcast ip
+        tmp = std::string(local_ip);
+        tmp = tmp.replace(tmp.find_last_of('.') + 1, tmp.length() - tmp.find_last_of('.'), "255");
+        const char* broadcast_ip = tmp.c_str();
 
+        // port
         int port = std::stoi(argv[2]);
 
         // shm name
@@ -44,12 +48,13 @@ int main(int argc, char *argv[])
 
         // UDP
         boost::asio::io_service io_service;
-        udp_sender sender(io_service, shm, local_ip_bytes, multicast_ip, port);
-        udp_receiver receiver(io_service, shm, local_ip_bytes, multicast_ip, port, sender, ti, false);
+        udp_sender sender(io_service, shm, local_ip_bytes, broadcast_ip, port);
+        udp_receiver receiver(io_service, shm, local_ip_bytes, broadcast_ip, port, sender, ti, false);
         std::cout << "Thread started" << std::endl;
 
         // api
         set_udp_sender(&sender);
+        set_shm(&shm);
 
         // simulated application
         application_simulator simulator(shm_name);
@@ -105,5 +110,6 @@ int main(int argc, char *argv[])
 
     }
 
+    stop_rm_daemon();
     return 0;
 }
