@@ -52,13 +52,13 @@ struct udp_sender
         std::cout << "\t\033[1;42mSent:\033[0m\n";
         std::cout << "\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
-        udp_payload package(local_ip_bytes_, shm_, 0, sizeof(shm_struct));
+        udp_payload packet(local_ip_bytes_, shm_, 0, sizeof(shm_struct));
 
-        std::cout << "\t\033[1;32mPackage data: \033[0m" << package << "\n";
-        std::cout << "\t\033[1;32mPackage size: \033[0m" << 28 + package.length << "\n";
+        std::cout << "\t\033[1;32mPackage data: \033[0m" << packet << "\n";
+        std::cout << "\t\033[1;32mPackage size: \033[0m" << 28 + packet.length << "\n";
 
         socket.send_to(boost::asio::buffer(
-                &package, 28 /* offset and length */ + package.length
+                &packet, 28 /* offset and length */ + packet.length
         ), broadcast_endpoint);
     }
 

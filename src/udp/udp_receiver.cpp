@@ -108,7 +108,7 @@ private:
 //            shm_.set_data(&package.data, package.offset, package.length);
 //        }
 
-        udp_payload package = *(udp_payload *) &recv_buffer;
+        udp_payload packet = *(udp_payload *) &recv_buffer;
 //        std::cout << "\t\033[1;31mPackage data: \033[0m" << package << "\n";
 //        std::cout << "\t\033[1;31mINT data: \033[0m" << *(int*)&package.data << "\n";
 
@@ -119,11 +119,11 @@ private:
 //        print_ip(local_ip_bytes_);
 
 
-        if (std::memcmp(local_ip_bytes_, package.src_ip, 4) != 0) {
+        if (std::memcmp(local_ip_bytes_, packet.src_ip, 4) != 0) {
             std::cout << "\t\033[1;41mReceived:\033[0m\n";
             std::cout << "\t\033[1;31mBytes:        \033[0m" << bytes_transferred << "\n";
 
-            shm_.set_data(&package.data, package.offset, package.length);
+            shm_.set_data(&packet.data, packet.offset, packet.length);
 
             std::cout << "\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct() << "\n";
 
