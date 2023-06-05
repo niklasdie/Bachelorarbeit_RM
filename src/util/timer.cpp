@@ -6,7 +6,7 @@
 #include <chrono>
 #include <vector>
 #include <numeric>
-
+#include <boost/log/trivial.hpp>
 
 struct timer
 {
@@ -24,9 +24,9 @@ struct timer
             for (long l: average) {
                 sum += l;
             }
-            std::cout << "\033[1;33mAverage time: "
+            BOOST_LOG_TRIVIAL(info) << "\033[1;33mAverage time: "
                       << std::accumulate(average.begin(), average.end(), 0) / average.size()
-                      << "[µs]\033[0m\n";
+                      << "[µs]\033[0m";
         }
     };
 
@@ -39,11 +39,11 @@ struct timer
     {
         end_.push_back(std::chrono::high_resolution_clock::now());
         if (start_.size() > 0) {
-//            std::cout << "Start times: " << start_.size() << "\nEnd times: " << end_.size() << "\n";
+//            BOOST_LOG_TRIVIAL(debug) << "\nStart times: " << start_.size() << "\nEnd times: " << end_.size();
             average.push_back(std::chrono::duration_cast<std::chrono::microseconds>(
                     end_.at(end_.size() - 1) - start_.at(start_.size() - 1)
             ).count());
-            std::cout << "Time: " << average.at(average.size() - 1) << "[µs]\n";
+            BOOST_LOG_TRIVIAL(info) << "Time: " << average.at(average.size() - 1) << "[µs]";
         }
     }
 

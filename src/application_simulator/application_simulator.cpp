@@ -4,6 +4,7 @@
 
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
+#include <boost/log/trivial.hpp>
 #include <iostream>
 
 #include "application_simulator.hpp"
@@ -22,10 +23,10 @@ struct application_simulator
 
         shm_s = (shm_struct *) (region.get_address());
 
-        std::cout << "\033[1;35mShm attached:\n"
+        BOOST_LOG_TRIVIAL(info) << "\n\033[1;35mShm attached:\n"
             << "Shared Memory created and region mapped\n"
             << "Shm Address:    " << region.get_address() << ", Shm Length:    " << region.get_size()
-            << "\nObject address: " << shm_s << ", Object Length: " << sizeof(*shm_s) << "\033[0m\n";
+            << "\nObject address: " << shm_s << ", Object Length: " << sizeof(*shm_s) << "\033[0m";
 
         (*shm_s).i = 0;
         (*shm_s).l = 100;

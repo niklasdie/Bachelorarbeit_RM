@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREAD ON)
-find_package(Boost 1.42.0 REQUIRED COMPONENTS system thread regex)
+find_package(Boost 1.74.0 REQUIRED COMPONENTS system thread regex log_setup log)
 IF(Boost_FOUND)
     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
     LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
@@ -32,4 +32,4 @@ add_executable(
         src/application_simulator/application_simulator.hpp
 )
 target_link_libraries(rm_poc  ${USED_LIBS} librt.so)
-
+target_link_libraries(rm_poc pthread Boost::log Boost::log_setup )
