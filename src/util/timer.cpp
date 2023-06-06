@@ -28,6 +28,8 @@ struct timer
                       << std::accumulate(average.begin(), average.end(), 0) / average.size()
                       << "[µs]\033[0m";
         }
+        BOOST_LOG_TRIVIAL(debug) << "\nPackets send:     " << start_.size()
+                                 << "\nPackets received: " << end_.size();
     };
 
     void start()

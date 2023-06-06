@@ -25,7 +25,6 @@ public:
     virtual shm_struct& get_data_struct() = 0;
     virtual bool set_data(void* start, size_t length) = 0;
     virtual bool set_data(void* start, int offset, size_t length) = 0;
-    virtual bool set_data(const std::string &data) = 0;
     virtual bool set_data(const shm_struct &data) = 0;
 
 protected:
@@ -39,15 +38,20 @@ struct shm_o: shm
 {
     explicit shm_o(const char* shm_name) : shm_name(shm_name)
     {
+        // remove old shm when it exists
         shared_memory_object::remove(shm_name);
 
+        // create new shm
         shm_obj = shared_memory_object(create_only, shm_name, read_write);
         shm_obj.truncate(sizeof(*shm_s));
 
+        // map shm to region
         region = mapped_region(shm_obj, read_write);
 
+        // set shm to all 0
         std::memset(region.get_address(), 0, region.get_size());
 
+        // create new struct in shm
         shm_s = new (region.get_address()) shm_struct();
 
         in_use = false;
@@ -67,6 +71,7 @@ struct shm_o: shm
 
 public:
 
+    /// sets data in shm by start pointer and length
     bool set_data(void* start, size_t length) override
     {
         while(in_use) {}
@@ -76,6 +81,7 @@ public:
         return true;
     }
 
+    /// sets data in shm by start pointer, offset and length
     bool set_data(void* start, int offset, size_t length) override
     {
         while(in_use) {}
@@ -85,19 +91,7 @@ public:
         return true;
     }
 
-    bool set_data(const std::string &data) override
-    {
-        while(in_use) {}
-        in_use = true;
-        char *mem = (char *) region.get_address();
-        for (char c : data) {
-            std::memset(mem, c, 1);
-            mem++;
-        }
-        in_use = false;
-        return true;
-    }
-
+    /// sets data in shm by a struct object
     bool set_data(const shm_struct &data) override
     {
         while(in_use) {}
@@ -107,21 +101,25 @@ public:
         return true;
     }
 
+    /// gets pointer of the start of shm
     void* get_data() override
     {
         return region.get_address();
     }
 
+    /// gets gets the size of shm
     size_t get_size() override
     {
         return region.get_size();
     }
 
+    /// gets name of shm
     const char* get_name()
     {
         return shm_name;
     }
 
+    /// gets data of shm in string representation
     std::string get_data_bytes_as_string() override
     {
         while(in_use) {}
@@ -135,6 +133,7 @@ public:
         return s;
     }
 
+    /// gets data of shm as struct object
     shm_struct& get_data_struct() override
     {
         while(in_use) {}

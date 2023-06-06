@@ -8,10 +8,10 @@
 #include "../shm/shm.cpp"
 
 struct udp_payload {
-    char src_ip[4];
-    ptrdiff_t offset;
-    int length;
-    char data[1440]; // 1440
+    char src_ip[4];         // source ip address of packet
+    ptrdiff_t offset;       // offset of data within the shm
+    int length;             // length of data
+    char data[1440];        // data
 
     udp_payload(char ip[4], shm &shm, ptrdiff_t offset, int length) : offset(offset), length(length)
     {
