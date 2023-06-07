@@ -28,6 +28,8 @@ struct timer
                       << std::accumulate(average.begin(), average.end(), 0) / average.size()
                       << "[µs]\033[0m";
         }
+        BOOST_LOG_TRIVIAL(debug) << "\nPackets send:     " << start_.size()
+                                 << "\nPackets received: " << end_.size();
     };
 
     void start()
@@ -49,7 +51,7 @@ struct timer
 
     void clear()
     {
-        start_ = std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>();
-        end_ = std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>();
+        start_.clear();
+        end_.clear();
     }
 };
