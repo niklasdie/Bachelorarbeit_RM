@@ -76,13 +76,6 @@ int main(int argc, char *argv[])
 
         // local ip to bytes
         const char* local_ip = argv[1];
-        char local_ip_bytes[4];
-        std::istringstream ip(local_ip);
-        std::string tmp;
-        for (size_t i = 0; i < sizeof(local_ip_bytes); ++i) {
-            std::getline(ip, tmp, '.');
-            local_ip_bytes[i] = (char) stoi(tmp);
-        }
 
         // local ip to broadcast ip
         const char* multicast_ip = argv[2];
@@ -101,8 +94,8 @@ int main(int argc, char *argv[])
 
         // UDP
         boost::asio::io_service io_service;
-        udp_sender sender(io_service, shm, local_ip_bytes, multicast_ip, port, ti);
-        udp_receiver receiver(io_service, shm, local_ip_bytes, multicast_ip, port, sender, ti, false);
+        udp_sender sender(io_service, shm, multicast_ip, port, ti);
+        udp_receiver receiver(io_service, shm, multicast_ip, port, sender, ti, false);
 
         // api
         set_udp_sender(&sender);
