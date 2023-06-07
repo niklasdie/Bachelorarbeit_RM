@@ -53,5 +53,6 @@ struct timer
     {
         start_.clear();
         end_.clear();
+        average.clear();
     }
 };

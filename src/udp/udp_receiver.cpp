@@ -2,7 +2,6 @@
 // Created by Niklas Diekhöner on 10.03.23.
 //
 
-#include <iostream>
 #include <boost/asio.hpp>
 #include <boost/asio/socket_base.hpp>
 
@@ -23,9 +22,10 @@ struct udp_receiver
     {
         // configuring socket
         socket.open(udp::v4());
+//        socket.non_blocking(true);
 //        socket.set_option(udp::socket::reuse_address(true));
 //        socket.set_option(boost::asio::ip::multicast::enable_loopback(false));
-        socket.set_option(boost::asio::socket_base::receive_buffer_size(14600));
+        socket.set_option(boost::asio::socket_base::receive_buffer_size(146000));
         socket.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::make_address(multicast_ip)));
         BOOST_LOG_TRIVIAL(debug) << "Multicast address: " << multicast_ip;
         socket.bind(udp::endpoint(address::from_string(multicast_ip), port));

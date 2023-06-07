@@ -15,7 +15,7 @@ set(USED_LIBS ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBR
 #set(CMAKE_CXX_FLAGS "-L /usr/lib/ -lboost_system -lboost_thread -lpthread")
 
 add_executable(
-        rm_poc
+        rm
         src/main.cpp
         src/shm/shm.cpp
         src/api/shm_api.hpp
@@ -31,5 +31,5 @@ add_executable(
         src/application_simulator/application_simulator.cpp
         src/application_simulator/application_simulator.hpp
 )
-target_link_libraries(rm_poc  ${USED_LIBS} librt.so)
-target_link_libraries(rm_poc pthread Boost::log Boost::log_setup )
+target_link_libraries(rm  ${USED_LIBS} librt.so)
+target_link_libraries(rm pthread Boost::log Boost::log_setup )

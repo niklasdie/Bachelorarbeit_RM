@@ -29,21 +29,52 @@ static void rm_in()
     (*udp_sender_).send_data();
 }
 
-static void rm_in(void *source, int length)
+static void rm_in(const void *source, int length)
 {
-    (*udp_sender_).send_data(source, length);
+    (*shm_).set_data(source, length);
+    (*udp_sender_).send_data((*shm_).get_data(), length);
+}
+
+static void rm_in(const void *source, void *destination, int length)
+{
+    if((*shm_).set_data(source, destination, length)) {
+        (*udp_sender_).send_data(destination, length);
+    }
+}
+
+static void rm_in(const void *source, size_t offset, int length)
+{
+    (*shm_).set_data(source, offset, length);
+    (*udp_sender_).send_data(offset, length);
+}
+
+template<typename T>
+static void rm_in(void *destination, T &value)
+{
+    (*shm_).set_data(value, destination, sizeof(value));
+    (*udp_sender_).send_data(destination, sizeof(value));
 }
 
 static void rm_out(const void *source, const void *destination, int length)
 {
+    size_t offset = (char*) source - (char*) (*shm_).get_data();
+    if (offset >= 0) {
+//        (*shm_).
+    }
 
 }
 
 /// Directly read or write from/to the shm.
 template<typename I>
-static void write(const void *destination, const I *value)
+static void write(const void *destination, const I &value)
 {
+    (*shm_).set_data(destination, sizeof(value));
+}
 
+template<typename I>
+static void write(const void *destination, size_t length)
+{
+    (*shm_).set_data(destination, length);
 }
 
 template<typename O>

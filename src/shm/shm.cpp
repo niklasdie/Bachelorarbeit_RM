@@ -23,8 +23,9 @@ public:
     virtual const char* get_name() = 0;
     virtual std::string get_data_bytes_as_string() = 0;
     virtual shm_struct& get_data_struct() = 0;
-    virtual bool set_data(void* start, size_t length) = 0;
-    virtual bool set_data(void* start, int offset, size_t length) = 0;
+    virtual bool set_data(const void* src_start, size_t length) = 0;
+    virtual bool set_data(const void* src_start, void* dest_start, size_t length) = 0;
+    virtual bool set_data(const void* src_start, size_t offset, size_t length) = 0;
     virtual bool set_data(const shm_struct &data) = 0;
 
 protected:
@@ -54,7 +55,7 @@ struct shm_o: shm
         // create new struct in shm
         shm_s = new (region.get_address()) shm_struct();
 
-        in_use = false;
+        writing = false;
 
         BOOST_LOG_TRIVIAL(info) << "\n\033[1;33mShm created:\n"
         << "Shared Memory created and region mapped\n"
@@ -72,32 +73,46 @@ struct shm_o: shm
 public:
 
     /// sets data in shm by start pointer and length
-    bool set_data(void* start, size_t length) override
+    bool set_data(const void* src_start, size_t length) override
     {
-        while(in_use) {}
-        in_use = true;
-        std::memcpy(region.get_address(), start, length);
-        in_use = false;
+        while(writing | reading) {}
+        writing = true;
+        std::memcpy(region.get_address(), src_start, length);
+        writing = false;
         return true;
     }
 
-    /// sets data in shm by start pointer, offset and length
-    bool set_data(void* start, int offset, size_t length) override
+    /// sets data in shm by start pointer and length
+    bool set_data(const void* src_start, void* dest_start, size_t length) override
     {
-        while(in_use) {}
-        in_use = true;
-        std::memcpy((void *) (((char *) region.get_address()) + offset),  start, length);
-        in_use = false;
+        while(writing | reading) {}
+        int offset = (char*) dest_start - (char*) region.get_address();
+        if (offset >= 0 & region.get_size() >= offset + length) {
+            writing = true;
+            std::memcpy(dest_start, src_start, length);
+            writing = false;
+            return true;
+        }
+        return false;
+    }
+
+    /// sets data in shm by start pointer, offset and length
+    bool set_data(const void* src_start, size_t offset, size_t length) override
+    {
+        while(writing | reading) {}
+        writing = true;
+        std::memcpy((void *) (((char *) region.get_address()) + offset),  src_start, length);
+        writing = false;
         return true;
     }
 
     /// sets data in shm by a struct object
     bool set_data(const shm_struct &data) override
     {
-        while(in_use) {}
-        in_use = true;
+        while(writing | reading) {}
+        writing = true;
         std::memcpy(region.get_address(), &data, region.get_size());
-        in_use = false;
+        writing = false;
         return true;
     }
 
@@ -114,7 +129,7 @@ public:
     }
 
     /// gets name of shm
-    const char* get_name()
+    const char* get_name() override
     {
         return shm_name;
     }
@@ -122,27 +137,28 @@ public:
     /// gets data of shm in string representation
     std::string get_data_bytes_as_string() override
     {
-        while(in_use) {}
-        in_use = true;
+        while(writing) {}
+        reading = true;
         char *mem = (char *) region.get_address();
-        std::string s;//(region.get_address(), ((char*) region.get_address()) + region.get_size());
+        std::string s;
         for (std::size_t i = 0; i < region.get_size(); ++i) {
             s += *mem++;
         }
-        in_use = false;
+        reading = false;
         return s;
     }
 
     /// gets data of shm as struct object
     shm_struct& get_data_struct() override
     {
-        while(in_use) {}
+        while(writing) {}
         return *((shm_struct*) region.get_address());
     }
 
 private:
     shared_memory_object shm_obj;
-    bool in_use;
+    bool writing;
+    bool reading;
     const char* shm_name;
 };
 

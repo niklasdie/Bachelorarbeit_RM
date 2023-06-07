@@ -13,7 +13,6 @@
 #include <boost/log/utility/setup/formatter_parser.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "application_simulator/application_simulator.cpp"
 
@@ -118,7 +117,7 @@ int main(int argc, char *argv[])
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
             BOOST_LOG_TRIVIAL(debug) << "Start sending";
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
 //                std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 simulator.do_something();
 //                rm_in((void *) &s.get_data_struct().data, sizeof(char[12]));
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
             BOOST_LOG_TRIVIAL(debug) << "\t\033[1;32mData shm before:       \033[0m" << shm.get_data_struct();
 
             // wait for all packages to arrive
-            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
             // print current state of shm after all packages
             BOOST_LOG_TRIVIAL(debug) << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s;

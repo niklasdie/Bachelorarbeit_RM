@@ -6,10 +6,10 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/log/trivial.hpp>
 #include <iostream>
+#include <math.h>
 
 #include "application_simulator.hpp"
-
-#include <math.h>
+//#include "../api/shm_api.hpp"
 
 using namespace boost::interprocess;
 
