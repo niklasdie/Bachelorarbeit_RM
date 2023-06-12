@@ -67,10 +67,10 @@ private:
         shm_.set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
-                                 << "\n\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct()
-                                 << "\n\t\033[1;31mPackage data: \033[0m" << packet
-                                 << "\n\t\033[1;31mPackage size: \033[0m" << 28 + packet.length
-                                 << "\n\t\033[1;31mBytes:        \033[0m" << bytes_transferred;
+                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;31mPackage data:     \033[0m" << packet
+                                 << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
+                                 << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
 
         ti.end();
 
@@ -89,10 +89,10 @@ private:
         shm_.set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
-                                 << "\n\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct()
-                                 << "\n\t\033[1;31mPackage data: \033[0m" << packet
-                                 << "\n\t\033[1;31mPackage size: \033[0m" << 28 + packet.length
-                                 << "\n\t\033[1;31mBytes:        \033[0m" << bytes_transferred;
+                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;31mPackage data:     \033[0m" << packet
+                                 << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
+                                 << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
 
         ti.end();
 

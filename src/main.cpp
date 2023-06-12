@@ -114,23 +114,68 @@ int main(int argc, char *argv[])
             BOOST_LOG_TRIVIAL(info) << "\033[1;42mSend Mode\033[0m";
 
             // wait for Receive Mode to set up
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             BOOST_LOG_TRIVIAL(debug) << "Start sending";
 
-            for (int i = 0; i < 100; i++) {
+            /// big udp packets test
+            simulator.do_something();
+            BOOST_LOG_TRIVIAL(debug) << "sync_all_rm()";
+            sync_all_rm();
+            simulator.do_something();
+            BOOST_LOG_TRIVIAL(debug) << "rm_in_sl(&shm.get_data_struct().data, 1453)";
+            rm_in_sl(&shm.get_data_struct().data, 1453);
+            simulator.do_something();
+            BOOST_LOG_TRIVIAL(debug) << "rm_in_sol(&shm.get_data_struct().data, 0, 1453)";
+            rm_in_sol(&shm.get_data_struct().data, 0, 1453);
+
+            /// loop test
+//            for (int i = 0; i < 100; i++) {
 //                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                simulator.do_something();
-//                rm_in((void *) &s.get_data_struct().data, sizeof(char[12]));
-                rm_in();
-            }
+//                simulator.do_something();
+//                sync_all_rm();
+//            }
+
+            /// api test
+//            char data[12] = "Hallo Test";
+//            BOOST_LOG_TRIVIAL(debug) << "sync_all_rm()";
+//            sync_all_rm();
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_s(&shm.get_data_struct())";
+//            rm_in_s(&shm.get_data_struct());
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_sl(&shm.get_data_struct(), 10)";
+//            rm_in_sl(&shm.get_data_struct(), 10);
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_ts<int>(&shm.get_data_struct().data)";
+//            rm_in_ts<char[12]>(&shm.get_data_struct().data);
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_sdl(data, &shm.get_data_struct().data, sizeof(data))";
+//            rm_in_sdl(data,  &shm.get_data_struct().data, sizeof(data));
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_tsd<char[12]>(data, &shm.get_data_struct().i)";
+//            rm_in_tsd<char[12]>(data,  &shm.get_data_struct().i);
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_sol(data, 0, sizeof(data))";
+//            rm_in_sol(data, 0, sizeof(data));
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_tso<char[12]>(data, 0)";
+//            rm_in_tso<char[12]>(data, 0);
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_vd( &shm.get_data_struct().i, 10)";
+//            int i = 10;
+//            rm_in_vd( &shm.get_data_struct().i, &i);
+//            simulator.do_something();
+//            BOOST_LOG_TRIVIAL(debug) << "rm_in_vo(0, \"Hallo Test\")";
+//            rm_in_vo(0, "Hallo Test");
+
             std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         } else { // Receive Mode
             ti.clear();
             BOOST_LOG_TRIVIAL(info) << "\033[1;42mReceive Mode\033[0m";
 
             // change to receive and resend all packages
-            receiver.change_to_receive_and_resend();
-            BOOST_LOG_TRIVIAL(debug) << "Changed to receive and resend";
+//            receiver.change_to_receive_and_resend();
+//            BOOST_LOG_TRIVIAL(debug) << "Changed to receive and resend";
 
             // print current state of shm before all packages
             BOOST_LOG_TRIVIAL(debug) << "\t\033[1;32mData simulator before: \033[0m" << *simulator.shm_s;
