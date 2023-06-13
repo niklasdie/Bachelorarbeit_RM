@@ -5,9 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/socket_base.hpp>
 
-#include "udp_payload.hpp"
 #include "udp_sender.cpp"
-#include "../shm/shm.cpp"
 
 #define IPADDRESS "10.0.0.1" // "127.0.0.1"
 #define UDP_PORT 8080

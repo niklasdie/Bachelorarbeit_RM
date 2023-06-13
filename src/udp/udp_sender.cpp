@@ -74,7 +74,7 @@ public:
             BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
                                      << "\n\t\033[1;32mData shm:         \033[0m" << shm_.get_data_struct()
                                      << "\n\t\033[1;32mPackage data:     \033[0m" << packet
-                                     << "\n\t\033[1;32mPackage size:     \033[0m" << 28 + packet.length;
+                                     << "\n\t\033[1;32mPackage size:     \033[0m" << sizeof(packet);
 
             // send payload to multicast
             socket.send_to(boost::asio::buffer(
@@ -119,7 +119,7 @@ public:
             BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
                                      << "\n\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct()
                                      << "\n\t\033[1;32mPackage data: \033[0m" << packet
-                                     << "\n\t\033[1;32mPackage size: \033[0m" << 28 + packet.length;
+                                     << "\n\t\033[1;32mPackage size: \033[0m" << sizeof(packet);
 
             // send payload to multicast
             socket.send_to(boost::asio::buffer(
@@ -163,7 +163,7 @@ public:
             BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
                                      << "\n\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct()
                                      << "\n\t\033[1;32mPackage data: \033[0m" << packet
-                                     << "\n\t\033[1;32mPackage size: \033[0m" << 28 + packet.length;
+                                     << "\n\t\033[1;32mPackage size: \033[0m" << sizeof(packet);
 
             // send payload to multicast
             socket.send_to(boost::asio::buffer(

@@ -8,16 +8,15 @@
 #include <iostream>
 #include <math.h>
 #include <thread>
-#include <chrono>
 
-#include "application_simulator.hpp"
+#include "application_simulator_big.hpp"
 #include "../api/rm_api.h"
 
 using namespace boost::interprocess;
 
-struct application_simulator
+struct application_simulator_big
 {
-    application_simulator(const char *shm_name)
+    application_simulator_big(const char *shm_name)
     {
         shm_obj = shared_memory_object(open_only, shm_name, read_write);
 
@@ -42,7 +41,7 @@ struct application_simulator
         (*shm_s).innerStruct.c = 'z';
     };
 
-    ~application_simulator()
+    ~application_simulator_big()
     {
 
     }
@@ -80,7 +79,7 @@ public:
 
 int main(int argc, char *argv[]) {
     if (argc == 2) {
-        application_simulator simulator(argv[1]);
+        application_simulator_big simulator(argv[1]);
 
         /// loop test
         for (int i = 0; i < 100; i++) {
