@@ -18,10 +18,8 @@ add_executable(
         rm
         src/main/main.cpp
         src/shm/shm.cpp
-        src/api/rm_api.h
-        src/api/rm_api.cpp
-        src/api/rm_api_private.h
-        src/api/rm_api_private.cpp
+        src/api/rm_api.hpp
+        src/api/rm_api_private.hpp
         src/udp/udp_sender.cpp
         src/udp/udp_receiver.cpp
         src/udp/udp_payload.hpp
@@ -33,10 +31,8 @@ add_executable(
         rm_test_loop
         src/test/test_loop.cpp
         src/shm/shm.cpp
-        src/api/rm_api.h
-        src/api/rm_api.cpp
-        src/api/rm_api_private.h
-        src/api/rm_api_private.cpp
+        src/api/rm_api.hpp
+        src/api/rm_api_private.hpp
         src/udp/udp_sender.cpp
         src/udp/udp_receiver.cpp
         src/udp/udp_payload.hpp
@@ -48,10 +44,8 @@ add_executable(
         rm_test_api
         src/test/test_api.cpp
         src/shm/shm.cpp
-        src/api/rm_api.h
-        src/api/rm_api.cpp
-        src/api/rm_api_private.h
-        src/api/rm_api_private.cpp
+        src/api/rm_api.hpp
+        src/api/rm_api_private.hpp
         src/udp/udp_sender.cpp
         src/udp/udp_receiver.cpp
         src/udp/udp_payload.hpp
@@ -63,10 +57,8 @@ add_executable(
         rm_test_big_packets
         src/test/test_big_packets.cpp
         src/shm/shm.cpp
-        src/api/rm_api.h
-        src/api/rm_api.cpp
-        src/api/rm_api_private.h
-        src/api/rm_api_private.cpp
+        src/api/rm_api.hpp
+        src/api/rm_api_private.hpp
         src/udp/udp_sender.cpp
         src/udp/udp_receiver.cpp
         src/udp/udp_payload.hpp
@@ -78,14 +70,14 @@ add_executable(
         application_simulator
         src/application_simulator/application_simulator.cpp
         src/application_simulator/application_simulator.hpp
-        src/api/rm_api.h
+        src/api/rm_api.hpp
 )
 
 add_executable(
         application_simulator_big
         src/application_simulator/application_simulator_big.cpp
         src/application_simulator/application_simulator_big.hpp
-        src/api/rm_api.h
+        src/api/rm_api.hpp
 )
 
 target_link_libraries(rm  ${USED_LIBS} librt.so)

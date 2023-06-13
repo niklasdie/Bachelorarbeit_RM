@@ -57,7 +57,7 @@ struct shm_o: shm
 
         writing = false;
 
-        BOOST_LOG_TRIVIAL(info) << "\n\033[1;33mShm created:\n"
+        BOOST_LOG_TRIVIAL(info) << "\n\033[1;32mShm created:\n"
         << "Shared Memory created and region mapped\n"
         << "Shm Address:    " << region.get_address() << ", Shm Length:    " << region.get_size()
         << "\nObject address: " << shm_s << ", Object Length: " << sizeof(*shm_s) << "\033[0m";

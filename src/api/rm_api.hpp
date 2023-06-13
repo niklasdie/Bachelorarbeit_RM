@@ -1,11 +1,19 @@
 //
-// Created by dev on 25.05.23.
+// Created by Niklas Diekhöner on 10.03.23.
 //
 
-#include "rm_api.h"
-#include "rm_api_private.h"
+#pragma once
 
-// public
+#include <cstddef>
+#include "../udp/udp_receiver.cpp"
+
+udp_sender *udp_sender_;
+shm_o *shm_;
+
+/// When the rm daemon is started this api can be used to notify the daemon of a change in the shm,
+/// set and get data from the rm.
+/// The daemon immediately synchronises all shm when written to the rm via the api.
+
 /// Notify rm daemon to end work.
 void stop_rm_daemon()
 {
@@ -14,6 +22,7 @@ void stop_rm_daemon()
 }
 
 /// Notify rm daemon to sync the rm data.
+/// Useful for synchronising when directly written to shm.
 void sync_all_rm()
 {
     (*udp_sender_).send_data();
@@ -41,10 +50,9 @@ void sync_rm(const size_t offset)
     (*udp_sender_).send_data(offset, sizeof(T));
 }
 
-
 /// rm_in_s
 /// Write to the rm and the daemon will directly sync the written data.
-
+/// s = source, d = destination, l = length, o = offset, v = value, t = template
 void rm_in_s(const void *src)
 {
     if((*shm_).set_data(src)) {
@@ -112,6 +120,7 @@ void rm_in_vo(size_t offset, const T &value)
         (*udp_sender_).send_data(offset, sizeof(value));
     }
 }
+
 
 /// rm_out
 /// Read from the rm.

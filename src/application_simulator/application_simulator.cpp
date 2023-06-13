@@ -11,7 +11,7 @@
 #include <chrono>
 
 #include "application_simulator.hpp"
-#include "../api/rm_api.h"
+#include "../api/rm_api.hpp"
 
 using namespace boost::interprocess;
 

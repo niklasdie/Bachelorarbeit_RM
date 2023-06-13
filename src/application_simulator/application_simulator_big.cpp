@@ -10,7 +10,7 @@
 #include <thread>
 
 #include "application_simulator_big.hpp"
-#include "../api/rm_api.h"
+#include "../api/rm_api.hpp"
 
 using namespace boost::interprocess;
 
