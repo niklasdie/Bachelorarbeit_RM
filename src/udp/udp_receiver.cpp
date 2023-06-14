@@ -15,7 +15,7 @@ using boost::asio::ip::address;
 
 struct udp_receiver
 {
-    udp_receiver(boost::asio::io_context &io_context, shm &shm, const char *multicast_ip, int port, udp_sender &sender, timer &ti, bool resend)
+    udp_receiver(boost::asio::io_context &io_context, shm_o *shm, const char *multicast_ip, int port, udp_sender *sender, timer &ti, bool resend)
             : io_context(io_context), shm_(shm), sender(sender), ti(ti)
     {
         // configuring socket
@@ -62,10 +62,10 @@ private:
 
         udp_payload packet = *(udp_payload *) &recv_buffer;
 
-        shm_.set_data(&packet.data, packet.offset, packet.length);
+        shm_->set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
-                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_->get_data_struct()
                                  << "\n\t\033[1;31mPackage data:     \033[0m" << packet
                                  << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
                                  << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
@@ -84,17 +84,17 @@ private:
         }
 
         udp_payload packet = *(udp_payload *) &recv_buffer;
-        shm_.set_data(&packet.data, packet.offset, packet.length);
+        shm_->set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
-                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_->get_data_struct()
                                  << "\n\t\033[1;31mPackage data:     \033[0m" << packet
                                  << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
                                  << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
 
         ti.end();
 
-        sender.send_data();
+        sender->send_data();
 
         start_async_receive_and_resend();
     }
@@ -162,8 +162,8 @@ private:
     udp::socket socket{io_context};
     boost::thread th_io_context_run;
     boost::thread th_handle_receive;
-    shm &shm_;
+    shm_o *shm_;
+    udp_sender *sender;
     char recv_buffer[1460];
-    udp_sender &sender;
     timer &ti;
 };

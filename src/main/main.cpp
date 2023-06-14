@@ -11,7 +11,7 @@
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
 
-#include "../api/rm_api_private.cpp"
+#include "../api/rm_api_private.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -23,16 +23,16 @@ int main(int argc, char *argv[])
 
     {
         // logger
-        boost::log::add_file_log
-        (
-                boost::log::keywords::file_name = "log.log",
-                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
-        );
-        boost::log::add_console_log
-        (
-                std::cout,
-                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
-        );
+//        boost::log::add_file_log
+//        (
+//                boost::log::keywords::file_name = "log.log"
+////                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
+//        );
+//        boost::log::add_console_log
+//        (
+//                std::clog
+////                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
+//        );
         if (argc > 5 && strcmp(argv[5], "-log") == 0) {
             if (strcmp(argv[6], "trace") == 0) {
                 boost::log::core::get()->set_filter
@@ -80,19 +80,24 @@ int main(int argc, char *argv[])
         const char* shm_name = argv[4];
 
         // shm
-        shm_o shm(shm_name);
+        shm_o *shm = new shm_o(shm_name, sizeof(udp_sender));
+        shm_o *shm_new = (shm_o *) shm->get_shm_o_address();
+        std::memcpy(shm_new, shm, sizeof(*shm));
+        shm = (shm_o*) shm_new;
 
         // timer
         timer ti{};
 
         // UDP
         boost::asio::io_service io_service;
-        udp_sender sender(io_service, shm, multicast_ip, port, ti);
+        udp_sender *sender = new (shm) udp_sender(io_service, shm, multicast_ip, port, ti);
         udp_receiver receiver(io_service, shm, multicast_ip, port, sender, ti, false);
 
+        BOOST_LOG_TRIVIAL(debug) << sizeof(udp_sender) << "; " << sizeof(*sender);
+        BOOST_LOG_TRIVIAL(debug) << sizeof(shm_o) << "; " << sizeof(*shm);
+
         // api
-        set_udp_sender(&sender);
-        set_shm(&shm);
+//        rm_api api(shm->get_address(), shm->get_shm_size(), sizeof(shm_struct));
 
         while(true) {}
 

@@ -17,7 +17,7 @@
 #include "../application_simulator/application_simulator.cpp"
 
 // api
-#include "../api/rm_api.cpp"
+#include "../api/rm_api_private.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -144,9 +144,9 @@ int main(int argc, char *argv[])
             BOOST_LOG_TRIVIAL(debug) << "rm_in_tso<char[12]>(data, 0)";
             rm_in_tso<char[12]>(data, 0);
             simulator.do_something();
-            BOOST_LOG_TRIVIAL(debug) << "rm_in_vd( &shm.get_data_struct().i, 10)";
+            BOOST_LOG_TRIVIAL(debug) << "rm_in_vd(&shm.get_data_struct().i, 10)";
             int i = 10;
-            rm_in_vd( &shm.get_data_struct().i, &i);
+            rm_in_vd(&shm.get_data_struct().i, &i);
             simulator.do_something();
             BOOST_LOG_TRIVIAL(debug) << "rm_in_vo(0, \"Hallo Test\")";
             rm_in_vo(0, "Hallo Test");

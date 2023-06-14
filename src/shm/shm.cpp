@@ -15,36 +15,17 @@
 
 using namespace boost::interprocess;
 
-struct shm
-{
-public:
-    virtual void* get_data() = 0;
-    virtual size_t get_size() = 0;
-    virtual const char* get_name() = 0;
-    virtual std::string get_data_bytes_as_string() = 0;
-    virtual shm_struct& get_data_struct() = 0;
-    virtual bool set_data(const void* src, size_t length) = 0;
-    virtual bool set_data(const void* src, void* dest, size_t length) = 0;
-    virtual bool set_data(const void* src, size_t offset, size_t length) = 0;
-    virtual bool set_data(const shm_struct &data) = 0;
-
-protected:
-    mapped_region region;
-    // struct that is mapped to shm
-    shm_struct *shm_s;
-};
-
 // SM
-struct shm_o: shm
+struct shm_o
 {
-    explicit shm_o(const char* shm_name) : shm_name(shm_name)
+    explicit shm_o(const char* shm_name, const size_t udp_sender_size) : shm_name(shm_name)
     {
         // remove old shm when it exists
         shared_memory_object::remove(shm_name);
 
         // create new shm
         shm_obj = shared_memory_object(create_only, shm_name, read_write);
-        shm_obj.truncate(sizeof(*shm_s));
+        shm_obj.truncate(sizeof(*shm_s) + sizeof(shm_o) + udp_sender_size);
 
         // map shm to region
         region = mapped_region(shm_obj, read_write);
@@ -57,10 +38,18 @@ struct shm_o: shm
 
         writing = false;
 
+        shm_o_ptr = (char*) region.get_address() + sizeof(*shm_s);
+
+        sender_ptr = (char*) region.get_address() + sizeof(*shm_s) + sizeof(shm_o);
+
+        BOOST_LOG_TRIVIAL(debug) << (char*) region.get_address() - (char*) shm_o_ptr;
+        BOOST_LOG_TRIVIAL(debug) << (char*) region.get_address() - (char*) sender_ptr;
+        BOOST_LOG_TRIVIAL(debug) << (char*) shm_o_ptr - (char*) sender_ptr;
+
         BOOST_LOG_TRIVIAL(info) << "\n\033[1;32mShm created:\n"
         << "Shared Memory created and region mapped\n"
         << "Shm Address:    " << region.get_address() << ", Shm Length:    " << region.get_size()
-        << "\nObject address: " << shm_s << ", Object Length: " << sizeof(*shm_s) << "\033[0m";
+        << "\nObject address: " << shm_s << ", Object Length: " << sizeof(shm_struct) << "\033[0m";
     }
 
     ~shm_o()
@@ -72,6 +61,16 @@ struct shm_o: shm
 
 public:
 
+    void* get_shm_o_address()
+    {
+        return shm_o_ptr;
+    }
+
+    void* get_sender_address()
+    {
+        return sender_ptr;
+    }
+
     bool set_data(const void* src)
     {
         while (writing | reading) {}
@@ -82,7 +81,7 @@ public:
     }
 
     /// sets data in shm by start pointer and length
-    bool set_data(const void* src, const size_t length) override
+    bool set_data(const void* src, const size_t length)
     {
         if (length >= 0 & region.get_size() >= length) {
             while (writing | reading) {}
@@ -95,7 +94,7 @@ public:
     }
 
     /// sets data in shm by start pointer and length
-    bool set_data(const void* src, void* dest, const size_t length) override
+    bool set_data(const void* src, void* dest, const size_t length)
     {
         int offset = (char*) dest- (char*) region.get_address();
         if (offset >= 0 & region.get_size() >= offset + length) {
@@ -109,7 +108,7 @@ public:
     }
 
     /// sets data in shm by start pointer, offset and length
-    bool set_data(const void* src, const size_t offset, const size_t length) override
+    bool set_data(const void* src, const size_t offset, const size_t length)
     {
         if (offset >= 0 & region.get_size() >= offset + length) {
             while (writing | reading) {}
@@ -122,7 +121,7 @@ public:
     }
 
     /// sets data in shm by a struct object
-    bool set_data(const shm_struct &data) override
+    bool set_data(const shm_struct &data)
     {
         while(writing | reading) {}
         writing = true;
@@ -132,19 +131,25 @@ public:
     }
 
     /// gets pointer of the start of shm
-    void* get_data() override
+    void* get_address()
     {
         return region.get_address();
     }
 
     /// gets gets the size of shm
-    size_t get_size() override
+    size_t get_shm_size()
     {
         return region.get_size();
     }
 
+    /// gets gets the size of shm
+    size_t get_size()
+    {
+        return sizeof(shm_struct);
+    }
+
     /// gets name of shm
-    const char* get_name() override
+    const char* get_name()
     {
         return shm_name;
     }
@@ -196,7 +201,7 @@ public:
     }
 
     /// gets data of shm in string representation
-    std::string get_data_bytes_as_string() override
+    std::string get_data_bytes_as_string()
     {
         char *mem = (char *) region.get_address();
         std::string s;
@@ -210,7 +215,7 @@ public:
     }
 
     /// gets data of shm as struct object
-    shm_struct& get_data_struct() override
+    shm_struct& get_data_struct()
     {
         while(writing) {}
         return *((shm_struct*) region.get_address());
@@ -218,9 +223,14 @@ public:
 
 private:
     shared_memory_object shm_obj;
+    mapped_region region;
+    // struct that is mapped to shm
+    shm_struct *shm_s;
     bool writing;
     bool reading;
     const char* shm_name;
+    void* shm_o_ptr;
+    void* sender_ptr;
 };
 
 #endif
