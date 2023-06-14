@@ -2,13 +2,10 @@
 // Created by Niklas Diekhöner on 10.03.23.
 //
 
-#include <iostream>
 #include <boost/asio.hpp>
 #include <boost/asio/socket_base.hpp>
 
-#include "udp_payload.hpp"
 #include "udp_sender.cpp"
-#include "../shm/shm.cpp"
 
 #define IPADDRESS "10.0.0.1" // "127.0.0.1"
 #define UDP_PORT 8080
@@ -23,9 +20,10 @@ struct udp_receiver
     {
         // configuring socket
         socket.open(udp::v4());
+//        socket.non_blocking(true);
 //        socket.set_option(udp::socket::reuse_address(true));
 //        socket.set_option(boost::asio::ip::multicast::enable_loopback(false));
-        socket.set_option(boost::asio::socket_base::receive_buffer_size(14600));
+        socket.set_option(boost::asio::socket_base::receive_buffer_size(146000));
         socket.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::make_address(multicast_ip)));
         BOOST_LOG_TRIVIAL(debug) << "Multicast address: " << multicast_ip;
         socket.bind(udp::endpoint(address::from_string(multicast_ip), port));
@@ -67,10 +65,10 @@ private:
         shm_.set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
-                                 << "\n\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct()
-                                 << "\n\t\033[1;31mPackage data: \033[0m" << packet
-                                 << "\n\t\033[1;31mPackage size: \033[0m" << 28 + packet.length
-                                 << "\n\t\033[1;31mBytes:        \033[0m" << bytes_transferred;
+                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;31mPackage data:     \033[0m" << packet
+                                 << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
+                                 << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
 
         ti.end();
 
@@ -89,10 +87,10 @@ private:
         shm_.set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
-                                 << "\n\t\033[1;31mData shm:     \033[0m" << shm_.get_data_struct()
-                                 << "\n\t\033[1;31mPackage data: \033[0m" << packet
-                                 << "\n\t\033[1;31mPackage size: \033[0m" << 28 + packet.length
-                                 << "\n\t\033[1;31mBytes:        \033[0m" << bytes_transferred;
+                                 << "\n\t\033[1;31mData shm:         \033[0m" << shm_.get_data_struct()
+                                 << "\n\t\033[1;31mPackage data:     \033[0m" << packet
+                                 << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
+                                 << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
 
         ti.end();
 

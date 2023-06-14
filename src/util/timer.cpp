@@ -42,9 +42,15 @@ struct timer
         end_.push_back(std::chrono::high_resolution_clock::now());
         if (start_.size() > 0) {
 //            BOOST_LOG_TRIVIAL(debug) << "\nStart times: " << start_.size() << "\nEnd times: " << end_.size();
-            average.push_back(std::chrono::duration_cast<std::chrono::microseconds>(
-                    end_.at(end_.size() - 1) - start_.at(start_.size() - 1)
-            ).count());
+            if (start_.size() >= end_.size()) {
+                average.push_back(std::chrono::duration_cast<std::chrono::microseconds>(
+                        end_.at(end_.size() - 1) - start_.at(end_.size() - 1)
+                ).count());
+            } else {
+                average.push_back(std::chrono::duration_cast<std::chrono::microseconds>(
+                        start_.at(start_.size() - 1) - end_.at(start_.size() - 1)
+                ).count());
+            }
             BOOST_LOG_TRIVIAL(info) << "Time: " << average.at(average.size() - 1) << "[µs]";
         }
     }
@@ -53,5 +59,6 @@ struct timer
     {
         start_.clear();
         end_.clear();
+        average.clear();
     }
 };

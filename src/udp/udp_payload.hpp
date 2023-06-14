@@ -8,9 +8,9 @@
 #include "../shm/shm.cpp"
 
 struct udp_payload {
-    ptrdiff_t offset;       // offset of data within the shm
-    int length;             // length of data
-    char data[1440];        // data
+    unsigned int offset;       // offset of data within the shm
+    unsigned int length;       // length of data
+    char data[1452];           // data
 
     udp_payload(shm &shm, ptrdiff_t offset, int length) : offset(offset), length(length)
     {

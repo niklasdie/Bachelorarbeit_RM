@@ -23,8 +23,9 @@ public:
     virtual const char* get_name() = 0;
     virtual std::string get_data_bytes_as_string() = 0;
     virtual shm_struct& get_data_struct() = 0;
-    virtual bool set_data(void* start, size_t length) = 0;
-    virtual bool set_data(void* start, int offset, size_t length) = 0;
+    virtual bool set_data(const void* src, size_t length) = 0;
+    virtual bool set_data(const void* src, void* dest, size_t length) = 0;
+    virtual bool set_data(const void* src, size_t offset, size_t length) = 0;
     virtual bool set_data(const shm_struct &data) = 0;
 
 protected:
@@ -54,9 +55,9 @@ struct shm_o: shm
         // create new struct in shm
         shm_s = new (region.get_address()) shm_struct();
 
-        in_use = false;
+        writing = false;
 
-        BOOST_LOG_TRIVIAL(info) << "\n\033[1;33mShm created:\n"
+        BOOST_LOG_TRIVIAL(info) << "\n\033[1;32mShm created:\n"
         << "Shared Memory created and region mapped\n"
         << "Shm Address:    " << region.get_address() << ", Shm Length:    " << region.get_size()
         << "\nObject address: " << shm_s << ", Object Length: " << sizeof(*shm_s) << "\033[0m";
@@ -71,33 +72,62 @@ struct shm_o: shm
 
 public:
 
-    /// sets data in shm by start pointer and length
-    bool set_data(void* start, size_t length) override
+    bool set_data(const void* src)
     {
-        while(in_use) {}
-        in_use = true;
-        std::memcpy(region.get_address(), start, length);
-        in_use = false;
+        while (writing | reading) {}
+        writing = true;
+        std::memcpy(region.get_address(), src, region.get_size());
+        writing = false;
         return true;
     }
 
-    /// sets data in shm by start pointer, offset and length
-    bool set_data(void* start, int offset, size_t length) override
+    /// sets data in shm by start pointer and length
+    bool set_data(const void* src, const size_t length) override
     {
-        while(in_use) {}
-        in_use = true;
-        std::memcpy((void *) (((char *) region.get_address()) + offset),  start, length);
-        in_use = false;
-        return true;
+        if (length >= 0 & region.get_size() >= length) {
+            while (writing | reading) {}
+            writing = true;
+            std::memcpy(region.get_address(), src, length);
+            writing = false;
+            return true;
+        }
+        return false;
+    }
+
+    /// sets data in shm by start pointer and length
+    bool set_data(const void* src, void* dest, const size_t length) override
+    {
+        int offset = (char*) dest- (char*) region.get_address();
+        if (offset >= 0 & region.get_size() >= offset + length) {
+            while(writing | reading) {}
+            writing = true;
+            std::memcpy(dest, src, length);
+            writing = false;
+            return true;
+        }
+        return false;
+    }
+
+    /// sets data in shm by start pointer, offset and length
+    bool set_data(const void* src, const size_t offset, const size_t length) override
+    {
+        if (offset >= 0 & region.get_size() >= offset + length) {
+            while (writing | reading) {}
+            writing = true;
+            std::memcpy((void *) (((char *) region.get_address()) + offset), src, length);
+            writing = false;
+            return true;
+        }
+        return false;
     }
 
     /// sets data in shm by a struct object
     bool set_data(const shm_struct &data) override
     {
-        while(in_use) {}
-        in_use = true;
+        while(writing | reading) {}
+        writing = true;
         std::memcpy(region.get_address(), &data, region.get_size());
-        in_use = false;
+        writing = false;
         return true;
     }
 
@@ -114,35 +144,82 @@ public:
     }
 
     /// gets name of shm
-    const char* get_name()
+    const char* get_name() override
     {
         return shm_name;
+    }
+
+    bool get_data(void* dest)
+    {
+        while (writing) {}
+        reading = true;
+        std::memcpy(dest, region.get_address(), region.get_size());
+        reading = false;
+        return true;
+    }
+
+    bool get_data(void* dest, const size_t length)
+    {
+        if (region.get_size() >= length) {
+            while (writing) {}
+            reading = true;
+            std::memcpy(dest, region.get_address(), length);
+            reading = false;
+            return true;
+        }
+        return false;
+    }
+
+    bool get_data(const void* src, void* dest, const size_t length)
+    {
+        int offset = (char*) src - (char*) region.get_address();
+        if (offset >= 0 & region.get_size() >= offset + length) {
+            while (writing) {}
+            reading = true;
+            std::memcpy(dest, src, length);
+            reading = false;
+            return true;
+        }
+        return false;
+    }
+
+    bool get_data(void *dest, const size_t offset, const size_t length)
+    {
+        if (region.get_size() >= offset + length) {
+            while (writing) {}
+            reading = true;
+            std::memcpy(dest, (void *) (((char *) region.get_address()) + offset), length);
+            reading = false;
+            return true;
+        }
+        return false;
     }
 
     /// gets data of shm in string representation
     std::string get_data_bytes_as_string() override
     {
-        while(in_use) {}
-        in_use = true;
         char *mem = (char *) region.get_address();
-        std::string s;//(region.get_address(), ((char*) region.get_address()) + region.get_size());
+        std::string s;
+        while(writing) {}
+        reading = true;
         for (std::size_t i = 0; i < region.get_size(); ++i) {
             s += *mem++;
         }
-        in_use = false;
+        reading = false;
         return s;
     }
 
     /// gets data of shm as struct object
     shm_struct& get_data_struct() override
     {
-        while(in_use) {}
+        while(writing) {}
         return *((shm_struct*) region.get_address());
     }
 
 private:
     shared_memory_object shm_obj;
-    bool in_use;
+    bool writing;
+    bool reading;
     const char* shm_name;
 };
 
