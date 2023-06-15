@@ -14,7 +14,7 @@ using boost::asio::ip::address;
 
 struct udp_sender
 {
-    udp_sender(boost::asio::io_context &io_context, shm_o *shm, const char *multicast_ip, int port, timer &ti)
+    udp_sender(boost::asio::io_context &io_context, shm_o &shm, const char *multicast_ip, int port, timer &ti)
         : io_context(io_context), shm_(shm), ti(ti)
     {
         // configuring socket
@@ -62,11 +62,6 @@ struct udp_sender
 
 public:
 
-    void set_shm(shm_o *shm)
-    {
-        shm_ = shm;
-    }
-
     /// sends the entire shm
     void send_data()
     {
@@ -77,7 +72,7 @@ public:
             udp_payload packet(shm_, 0, sizeof(shm_struct));
 
             BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
-                                     << "\n\t\033[1;32mData shm:         \033[0m" << shm_->get_data_struct()
+                                     << "\n\t\033[1;32mData shm:         \033[0m" << shm_.get_data_struct()
                                      << "\n\t\033[1;32mPackage data:     \033[0m" << packet
                                      << "\n\t\033[1;32mPackage size:     \033[0m" << sizeof(packet);
 
@@ -97,7 +92,7 @@ public:
                 udp_payload packet(shm_, offset, length);
 
                 BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
-                                         << "\n\t\033[1;32mData shm:         \033[0m" << shm_->get_data_struct()
+                                         << "\n\t\033[1;32mData shm:         \033[0m" << shm_.get_data_struct()
                                          << "\n\t\033[1;32mPackage data:     \033[0m" << packet
                                          << "\n\t\033[1;32mPackage size:     \033[0m" << sizeof(packet);
 
@@ -119,10 +114,10 @@ public:
 
         if(sizeof(shm_struct) <= 1452) {
             // create payload from data of shm
-            udp_payload packet(shm_, ((char *) source) - ((char *) shm_->get_address()), length);
+            udp_payload packet(shm_, ((char *) source) - ((char *) shm_.get_address()), length);
 
             BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
-                                     << "\n\t\033[1;32mData shm:     \033[0m" << shm_->get_data_struct()
+                                     << "\n\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct()
                                      << "\n\t\033[1;32mPackage data: \033[0m" << packet
                                      << "\n\t\033[1;32mPackage size: \033[0m" << sizeof(packet);
 
@@ -138,10 +133,10 @@ public:
             while (offset < length) {
                 int length_ = (length - offset >= 1452) ? 1452 : length - offset;
 
-                udp_payload packet(shm_, ((char *) source) - ((char *) shm_->get_address()) + offset, length_);
+                udp_payload packet(shm_, ((char *) source) - ((char *) shm_.get_address()) + offset, length_);
 
                 BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
-                                         << "\n\t\033[1;32mData shm:         \033[0m" << shm_->get_data_struct()
+                                         << "\n\t\033[1;32mData shm:         \033[0m" << shm_.get_data_struct()
                                          << "\n\t\033[1;32mPackage data:     \033[0m" << packet
                                          << "\n\t\033[1;32mPackage size:     \033[0m" << sizeof(packet);
 
@@ -166,7 +161,7 @@ public:
             udp_payload packet(shm_, offset, length);
 
             BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
-                                     << "\n\t\033[1;32mData shm:     \033[0m" << shm_->get_data_struct()
+                                     << "\n\t\033[1;32mData shm:     \033[0m" << shm_.get_data_struct()
                                      << "\n\t\033[1;32mPackage data: \033[0m" << packet
                                      << "\n\t\033[1;32mPackage size: \033[0m" << sizeof(packet);
 
@@ -185,7 +180,7 @@ public:
                 udp_payload packet(shm_, offset + offset_, length_);
 
                 BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;42mSent:\033[0m"
-                                         << "\n\t\033[1;32mData shm:         \033[0m" << shm_->get_data_struct()
+                                         << "\n\t\033[1;32mData shm:         \033[0m" << shm_.get_data_struct()
                                          << "\n\t\033[1;32mPackage data:     \033[0m" << packet
                                          << "\n\t\033[1;32mPackage size:     \033[0m" << sizeof(packet);
 
@@ -205,6 +200,6 @@ private:
     boost::asio::io_context &io_context;
     udp::socket socket{io_context};
     udp::endpoint multicast_endpoint;
-    shm_o *shm_;
+    shm_o &shm_;
     timer &ti;
 };

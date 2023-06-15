@@ -17,7 +17,7 @@
 #include "../application_simulator/application_simulator_big.cpp"
 
 // api
-#include "../api/rm_api.cpp"
+#include "../api/rm_api_private.hpp"
 
 int main(int argc, char *argv[])
 {

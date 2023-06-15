@@ -18,14 +18,14 @@ using namespace boost::interprocess;
 // SM
 struct shm_o
 {
-    explicit shm_o(const char* shm_name, const size_t udp_sender_size) : shm_name(shm_name)
+    explicit shm_o(const char* shm_name) : shm_name(shm_name)
     {
         // remove old shm when it exists
         shared_memory_object::remove(shm_name);
 
         // create new shm
         shm_obj = shared_memory_object(create_only, shm_name, read_write);
-        shm_obj.truncate(sizeof(*shm_s) + sizeof(shm_o) + udp_sender_size);
+        shm_obj.truncate(sizeof(*shm_s));
 
         // map shm to region
         region = mapped_region(shm_obj, read_write);
@@ -37,14 +37,6 @@ struct shm_o
         shm_s = new (region.get_address()) shm_struct();
 
         writing = false;
-
-        shm_o_ptr = (char*) region.get_address() + sizeof(*shm_s);
-
-        sender_ptr = (char*) region.get_address() + sizeof(*shm_s) + sizeof(shm_o);
-
-        BOOST_LOG_TRIVIAL(debug) << (char*) region.get_address() - (char*) shm_o_ptr;
-        BOOST_LOG_TRIVIAL(debug) << (char*) region.get_address() - (char*) sender_ptr;
-        BOOST_LOG_TRIVIAL(debug) << (char*) shm_o_ptr - (char*) sender_ptr;
 
         BOOST_LOG_TRIVIAL(info) << "\n\033[1;32mShm created:\n"
         << "Shared Memory created and region mapped\n"
@@ -60,16 +52,6 @@ struct shm_o
     }
 
 public:
-
-    void* get_shm_o_address()
-    {
-        return shm_o_ptr;
-    }
-
-    void* get_sender_address()
-    {
-        return sender_ptr;
-    }
 
     bool set_data(const void* src)
     {
@@ -96,7 +78,7 @@ public:
     /// sets data in shm by start pointer and length
     bool set_data(const void* src, void* dest, const size_t length)
     {
-        int offset = (char*) dest- (char*) region.get_address();
+        int offset = (char*) dest - (char*) region.get_address();
         if (offset >= 0 & region.get_size() >= offset + length) {
             while(writing | reading) {}
             writing = true;
@@ -229,8 +211,6 @@ private:
     bool writing;
     bool reading;
     const char* shm_name;
-    void* shm_o_ptr;
-    void* sender_ptr;
 };
 
 #endif

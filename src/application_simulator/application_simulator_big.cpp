@@ -76,16 +76,3 @@ public:
     mapped_region region;
     shm_struct *shm_s;
 };
-
-int main(int argc, char *argv[]) {
-    if (argc == 2) {
-        application_simulator_big simulator(argv[1]);
-
-        /// loop test
-        for (int i = 0; i < 100; i++) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            simulator.do_something();
-            sync_all_rm();
-        }
-    }
-}

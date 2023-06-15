@@ -80,21 +80,15 @@ int main(int argc, char *argv[])
         const char* shm_name = argv[4];
 
         // shm
-        shm_o *shm = new shm_o(shm_name, sizeof(udp_sender));
-        shm_o *shm_new = (shm_o *) shm->get_shm_o_address();
-        std::memcpy(shm_new, shm, sizeof(*shm));
-        shm = (shm_o*) shm_new;
+        shm_o shm(shm_name);
 
         // timer
         timer ti{};
 
         // UDP
         boost::asio::io_service io_service;
-        udp_sender *sender = new (shm) udp_sender(io_service, shm, multicast_ip, port, ti);
+        udp_sender sender(io_service, shm, multicast_ip, port, ti);
         udp_receiver receiver(io_service, shm, multicast_ip, port, sender, ti, false);
-
-        BOOST_LOG_TRIVIAL(debug) << sizeof(udp_sender) << "; " << sizeof(*sender);
-        BOOST_LOG_TRIVIAL(debug) << sizeof(shm_o) << "; " << sizeof(*shm);
 
         // api
 //        rm_api api(shm->get_address(), shm->get_shm_size(), sizeof(shm_struct));

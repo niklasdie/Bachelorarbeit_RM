@@ -135,8 +135,8 @@ int main(int argc, char *argv[])
             BOOST_LOG_TRIVIAL(debug) << "rm_in_sdl(data, &shm.get_data_struct().data, sizeof(data))";
             rm_in_sdl(data,  &shm.get_data_struct().data, sizeof(data));
             simulator.do_something();
-            BOOST_LOG_TRIVIAL(debug) << "rm_in_tsd<char[12]>(data, &shm.get_data_struct().i)";
-            rm_in_tsd<char[12]>(data,  &shm.get_data_struct().i);
+            BOOST_LOG_TRIVIAL(debug) << "rm_in_tsd<char[12]>(data, &shm.get_data_struct().data)";
+            rm_in_tsd<char[12]>(data,  &shm.get_data_struct().data);
             simulator.do_something();
             BOOST_LOG_TRIVIAL(debug) << "rm_in_sol(data, 0, sizeof(data))";
             rm_in_sol(data, 0, sizeof(data));
@@ -145,11 +145,10 @@ int main(int argc, char *argv[])
             rm_in_tso<char[12]>(data, 0);
             simulator.do_something();
             BOOST_LOG_TRIVIAL(debug) << "rm_in_vd(&shm.get_data_struct().i, 10)";
-            int i = 10;
-            rm_in_vd(&shm.get_data_struct().i, &i);
+            rm_in_vd(&shm.get_data_struct().i, 10); // problem with c_str
             simulator.do_something();
-            BOOST_LOG_TRIVIAL(debug) << "rm_in_vo(0, \"Hallo Test\")";
-            rm_in_vo(0, "Hallo Test");
+            BOOST_LOG_TRIVIAL(debug) << "rm_in_vo(12, 12)";
+            rm_in_vo(12, 12); // problem with c_str
 
 
             std::this_thread::sleep_for(std::chrono::milliseconds(3000));

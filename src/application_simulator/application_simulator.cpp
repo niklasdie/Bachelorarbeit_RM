@@ -24,8 +24,6 @@ struct application_simulator
 
         shm_s = (shm_struct *) (region.get_address());
 
-        init_rm_api(region.get_address(), region.get_size(), sizeof(shm_struct));
-
         BOOST_LOG_TRIVIAL(info) << "\n\033[1;32mShm attached:\n"
             << "Shared Memory created and region mapped\n"
             << "Shm Address:    " << region.get_address() << ", Shm Length:    " << region.get_size()
@@ -91,18 +89,3 @@ public:
     mapped_region region;
     shm_struct *shm_s;
 };
-
-int main(int argc, char *argv[]) {
-    if (argc == 2) {
-        application_simulator simulator(argv[1]);
-
-        /// loop test
-        for (int i = 0; i < 100; i++) {
-            BOOST_LOG_TRIVIAL(debug) << "Loop run: " << i;
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            simulator.do_something();
-            BOOST_LOG_TRIVIAL(debug) << "do_something finished";
-            sync_all_rm();
-        }
-    }
-}
