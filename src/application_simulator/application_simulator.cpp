@@ -6,14 +6,13 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/log/trivial.hpp>
 #include <math.h>
-#include <thread>
-#include <chrono>
 
 #include "application_simulator.hpp"
 #include "../api/rm_api.hpp"
 
 using namespace boost::interprocess;
 
+/// simulation of an application that uses the shm
 struct application_simulator
 {
     application_simulator(const char *shm_name)
@@ -60,9 +59,9 @@ struct application_simulator
 
 public:
 
+    /// does changes in the shm
     void do_something()
     {
-        BOOST_LOG_TRIVIAL(debug) << "do_something";
         (*shm_s).data[((*shm_s).i) % 11] = (*shm_s).c;
         (*shm_s).i++;
         ++(*shm_s).l;

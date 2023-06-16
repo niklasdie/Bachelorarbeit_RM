@@ -20,12 +20,10 @@ struct udp_receiver
     {
         // configuring socket
         socket.open(udp::v4());
-//        socket.non_blocking(true);
-//        socket.set_option(udp::socket::reuse_address(true));
-//        socket.set_option(boost::asio::ip::multicast::enable_loopback(false));
         socket.set_option(boost::asio::socket_base::receive_buffer_size(146000));
         socket.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::make_address(multicast_ip)));
         BOOST_LOG_TRIVIAL(debug) << "Multicast address: " << multicast_ip;
+        // bind to endpoint
         socket.bind(udp::endpoint(address::from_string(multicast_ip), port));
 
         // start io_context in new thread
@@ -60,8 +58,10 @@ private:
             return;
         }
 
+        // payload of received data
         udp_payload packet = *(udp_payload *) &recv_buffer;
 
+        // write data to shm
         shm_.set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
@@ -70,8 +70,10 @@ private:
                                  << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
                                  << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
 
+        // end timer
         ti.end();
 
+        // continue receiving
         start_async_receive();
     }
 
@@ -83,8 +85,10 @@ private:
             return;
         }
 
+        // payload of received data
         udp_payload packet = *(udp_payload *) &recv_buffer;
 
+        // write data to shm
         shm_.set_data(&packet.data, packet.offset, packet.length);
 
         BOOST_LOG_TRIVIAL(debug) << "\n\t\033[1;41mReceived:\033[0m"
@@ -93,16 +97,20 @@ private:
                                  << "\n\t\033[1;31mPackage size:     \033[0m" << sizeof(packet)
                                  << "\n\t\033[1;31mBytes transferred:\033[0m" << bytes_transferred;
 
+        // end timer
         ti.end();
 
-        sender.send_data();
+        // send data back
+        sender.send_data((size_t) 0, (size_t) packet.length);
 
+        // continue receiving
         start_async_receive_and_resend();
     }
 
     /// starts the async receive
     void start_async_receive()
     {
+        // start async receive
         socket.async_receive(boost::asio::buffer(recv_buffer),
                              boost::bind(
                                      &udp_receiver::handle_receive,
@@ -116,6 +124,7 @@ private:
     /// starts the async receive and resend to source
     void start_async_receive_and_resend()
     {
+        // start async receive
         socket.async_receive(boost::asio::buffer(recv_buffer),
                              boost::bind(
                                      &udp_receiver::handle_receive_and_send_back,

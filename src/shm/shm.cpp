@@ -8,7 +8,7 @@
 #include <iostream>
 
 // header file of simulation
-#include "../application_simulator/application_simulator.hpp"
+#include "../application_simulator/application_simulator_big.hpp"
 
 #ifndef SHM
 #define SHM
@@ -46,13 +46,14 @@ struct shm_o
 
     ~shm_o()
     {
-        /// deleting memory once is enough
+        // deleting memory once is enough
 //        delete shm_s;
         shared_memory_object::remove(shm_name);
     }
 
 public:
 
+    /// sets data in shm by start pointer
     bool set_data(const void* src)
     {
         while (writing | reading) {}
@@ -136,6 +137,7 @@ public:
         return shm_name;
     }
 
+    /// get data of shm to a destination
     bool get_data(void* dest)
     {
         while (writing) {}
@@ -145,6 +147,7 @@ public:
         return true;
     }
 
+    /// get data of shm to a destination with a length
     bool get_data(void* dest, const size_t length)
     {
         if (region.get_size() >= length) {
@@ -157,6 +160,7 @@ public:
         return false;
     }
 
+    /// get data of shm to a destination from a source with a length
     bool get_data(const void* src, void* dest, const size_t length)
     {
         int offset = (char*) src - (char*) region.get_address();
@@ -170,6 +174,7 @@ public:
         return false;
     }
 
+    /// get data of shm to a destination from a offset with a length
     bool get_data(void *dest, const size_t offset, const size_t length)
     {
         if (region.get_size() >= offset + length) {

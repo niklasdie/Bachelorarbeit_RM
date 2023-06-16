@@ -4,12 +4,16 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
 
 #include "../api/rm_api_private.hpp"
 
@@ -23,16 +27,17 @@ int main(int argc, char *argv[])
 
     {
         // logger
-//        boost::log::add_file_log
-//        (
-//                boost::log::keywords::file_name = "log.log"
-////                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
-//        );
-//        boost::log::add_console_log
-//        (
-//                std::clog
-////                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
-//        );
+        boost::log::add_common_attributes();
+        boost::log::add_file_log
+        (
+                boost::log::keywords::file_name = "log%N.log",
+                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
+        );
+        boost::log::add_console_log
+        (
+                std::cout,
+                boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
+        );
         if (argc > 5 && strcmp(argv[5], "-log") == 0) {
             if (strcmp(argv[6], "trace") == 0) {
                 boost::log::core::get()->set_filter
@@ -83,7 +88,7 @@ int main(int argc, char *argv[])
         shm_o shm(shm_name);
 
         // timer
-        timer ti{};
+        timer ti(".");
 
         // UDP
         boost::asio::io_service io_service;
