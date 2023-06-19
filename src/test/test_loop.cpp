@@ -123,10 +123,10 @@ int main(int argc, char *argv[])
             /// loop test
             for (int i = 0; i < 100; ++i) {
                 for (int j = 0; j < 100; ++j) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     simulator.do_something();
 //                    sync_rm_ol(0, 1452);
-                    sync_rm_ol(0, 1452 * 40);
+                    sync_rm_ol(0, 1452);
 //                    sync_all_rm();
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
             }
 
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(40000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(30000));
         } else { // Receive Mode
             ti.clear();
             BOOST_LOG_TRIVIAL(info) << "\033[1;42mReceive Mode\033[0m";
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             BOOST_LOG_TRIVIAL(debug) << "\t\033[1;32mData shm before:       \033[0m" << shm.get_data_struct();
 
             // wait for all packages to arrive
-            std::this_thread::sleep_for(std::chrono::milliseconds(50000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(120000));
 
             // print current state of shm after all packages
             BOOST_LOG_TRIVIAL(debug) << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s;

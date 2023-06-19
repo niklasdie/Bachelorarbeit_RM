@@ -37,7 +37,7 @@ void sync_rm(const void *src) {
     udp_sender_->send_data(src, sizeof(T));
 }
 
-void sync_rm(const size_t offset, const size_t length) {
+void sync_rm_ol(const size_t offset, const size_t length) {
     udp_sender_->send_data(offset, length);
 }
 
@@ -47,7 +47,7 @@ void sync_rm(const size_t offset) {
 }
 
 
-/// rm_in_s
+/// rm_in
 /// Write to the rm and the daemon will directly sync the written data.
 /// s = source, d = destination, l = length, o = offset, v = value, t = template
 
