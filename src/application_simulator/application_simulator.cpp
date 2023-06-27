@@ -5,16 +5,14 @@
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/log/trivial.hpp>
-#include <iostream>
 #include <math.h>
-#include <thread>
-#include <chrono>
 
 #include "application_simulator.hpp"
 #include "../api/rm_api.hpp"
 
 using namespace boost::interprocess;
 
+/// simulation of an application that uses the shm
 struct application_simulator
 {
     application_simulator(const char *shm_name)
@@ -25,10 +23,22 @@ struct application_simulator
 
         shm_s = (shm_struct *) (region.get_address());
 
-        BOOST_LOG_TRIVIAL(info) << "\n\033[1;35mShm attached:\n"
+        BOOST_LOG_TRIVIAL(info) << "\n\033[1;32mShm attached:\n"
             << "Shared Memory created and region mapped\n"
             << "Shm Address:    " << region.get_address() << ", Shm Length:    " << region.get_size()
             << "\nObject address: " << shm_s << ", Object Length: " << sizeof(*shm_s) << "\033[0m";
+
+//        rm_in_vd(&(*shm_s).i, 0);
+//        rm_in_vd(&(*shm_s).l, 100);
+//        rm_in_vd(&(*shm_s).d, 1.1);
+//        rm_in_vd(&(*shm_s).b, false);
+//        rm_in_vd(&(*shm_s).c, 'a');
+//        rm_in_vd(&(*shm_s).innerStruct.i, 123);
+//        rm_in_vd(&(*shm_s).innerStruct.l, 555555);
+//        rm_in_vd(&(*shm_s).innerStruct.d, M_PI);
+//        rm_in_vd(&(*shm_s).innerStruct.b, false);
+//        rm_in_vd(&(*shm_s).innerStruct.c, 'z');
+
 
         (*shm_s).i = 0;
         (*shm_s).l = 100;
@@ -44,11 +54,12 @@ struct application_simulator
 
     ~application_simulator()
     {
-
+        stop_rm_daemon();
     }
 
 public:
 
+    /// does changes in the shm
     void do_something()
     {
         (*shm_s).data[((*shm_s).i) % 11] = (*shm_s).c;
@@ -77,16 +88,3 @@ public:
     mapped_region region;
     shm_struct *shm_s;
 };
-
-int main(int argc, char *argv[]) {
-    if (argc == 2) {
-        application_simulator simulator(argv[1]);
-
-        /// loop test
-        for (int i = 0; i < 100; i++) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            simulator.do_something();
-            sync_all_rm();
-        }
-    }
-}

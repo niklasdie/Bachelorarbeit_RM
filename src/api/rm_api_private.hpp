@@ -17,4 +17,3 @@ void set_shm(shm_o *shm)
 {
     shm_ = shm;
 }
-

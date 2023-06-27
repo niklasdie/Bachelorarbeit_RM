@@ -4,14 +4,18 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
 
-#include "../api/rm_api_private.cpp"
+#include "../api/rm_api_private.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -23,9 +27,10 @@ int main(int argc, char *argv[])
 
     {
         // logger
+        boost::log::add_common_attributes();
         boost::log::add_file_log
         (
-                boost::log::keywords::file_name = "log.log",
+                boost::log::keywords::file_name = "log%N.log",
                 boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%"
         );
         boost::log::add_console_log
@@ -83,7 +88,7 @@ int main(int argc, char *argv[])
         shm_o shm(shm_name);
 
         // timer
-        timer ti{};
+        timer ti(".");
 
         // UDP
         boost::asio::io_service io_service;
@@ -91,8 +96,7 @@ int main(int argc, char *argv[])
         udp_receiver receiver(io_service, shm, multicast_ip, port, sender, ti, false);
 
         // api
-        set_udp_sender(&sender);
-        set_shm(&shm);
+//        rm_api api(shm->get_address(), shm->get_shm_size(), sizeof(shm_struct));
 
         while(true) {}
 
