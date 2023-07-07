@@ -121,20 +121,21 @@ int main(int argc, char *argv[])
 
 
             /// loop test
-            for (int i = 0; i < 100; ++i) {
-                for (int j = 0; j < 100; ++j) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            for (int i = 0; i < 10; ++i) {
+                for (int j = 0; j < 10; ++j) {
+//                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
                     simulator.do_something();
-//                    sync_rm_ol(0, 1452);
-                    sync_rm_ol(0, 1452);
+                    sync_rm_ol(0, 1464);
+//                    sync_rm_ol(0, 1452 * 1000);
+//                    sync_rm_ol(0, 1);
 //                    sync_all_rm();
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::microseconds(1000));
                 ti.checkpoint();
             }
 
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         } else { // Receive Mode
             ti.clear();
             BOOST_LOG_TRIVIAL(info) << "\033[1;42mReceive Mode\033[0m";
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
             BOOST_LOG_TRIVIAL(debug) << "\t\033[1;32mData shm before:       \033[0m" << shm.get_data_struct();
 
             // wait for all packages to arrive
-            std::this_thread::sleep_for(std::chrono::milliseconds(120000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(20000));
 
             // print current state of shm after all packages
             BOOST_LOG_TRIVIAL(debug) << "\t\033[1;31mData simulator after: \033[0m" << *simulator.shm_s;
