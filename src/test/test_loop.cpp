@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
             /// loop test
             for (int i = 0; i < 10; ++i) {
-                for (int j = 0; j < 10; ++j) {
+                for (int j = 0; j < 1000; ++j) {
 //                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
                     simulator.do_something();
                     sync_rm_ol(0, 1464);

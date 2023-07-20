@@ -1,0 +1,106 @@
+@startuml
+
+autonumber
+
+participant main order 10
+participant timer order 20
+participant shm_o order 30
+participant udp_sender order 40
+participant udp_receiver order 50
+participant udp_payload order 60
+
+'setup
+activate main #FFBBBB
+main -[#red]> main: reads args
+main -[#red]> main: setup logger
+main --[#red]> shm_o ** : shm_o(shm_name);
+activate shm_o #FFBBBB
+shm_o -[#red]> shm_o: remove old shm
+shm_o -[#red]> shm_o: create new shm
+shm_o -[#red]> shm_o: map data into shm
+main --[#red]> timer**: timer(".")
+activate timer #FFBBBB
+main --[#red]> udp_sender** : udp_sender(io_service, shm, multicast_ip, port, ti)
+activate udp_sender #FFBBBB
+udp_sender -[#red]> udp_sender: configure socket
+udp_sender -[#red]> udp_sender: configure endpoint
+main --[#red]> udp_receiver** : udp_receiver(io_service, shm, multicast_ip, port, sender, ti, false)
+activate udp_receiver #FFBBBB
+note right #lightblue
+blue marks a
+new thread
+end note
+udp_receiver -[#red]> udp_receiver: configure socket
+udp_receiver -[#red]> udp_receiver: configure endpoint
+udp_receiver -[#red]>> udp_receiver : start_async_receive()
+activate udp_receiver #lightblue
+
+'send
+main -[#red]> udp_sender : send_data(offset, length)
+activate udp_sender #FFBBBB
+udp_sender --[#red]> udp_payload **: udp_payload(shm, offset, length)
+activate udp_payload #FFBBBB
+udp_sender -[#red]> timer: start()
+        udp_payload -[#red]> shm_o : get_address()
+activate shm_o #FFBBBB
+        shm_o --[#red]> udp_payload : address
+deactivate shm_o
+udp_payload -[#red]> udp_payload: std::memcpy(dest, src, len)
+udp_sender -[#red]> udp_sender: send_to(udp_payload, address)
+deactivate udp_payload
+deactivate udp_sender
+
+'receive
+udp_receiver --[#blue]> udp_payload **: *(udp_payload *) &recv_buffer
+activate udp_payload #lightblue
+udp_receiver -[#blue]> udp_payload: payload.data, payload.offset, payload.length
+udp_payload --[#blue]> udp_receiver: payload.data, payload.offset, payload.length
+deactivate udp_payload
+udp_receiver -[#blue]> shm_o : set_data(payload.data, payload.offset, payload.length)
+udp_receiver -[#blue]> timer: end()
+
+main -[#red]> main: std::this_thread::sleep_for(std::chrono::milliseconds(2000))
+main -[#red]> timer : clear()
+
+alt send mode
+    main -[#red]> main : sleep(200)
+    loop n times
+        main -[#red]> udp_sender : send_data(offset, length)
+        activate udp_sender #FFBBBB
+        udp_sender --[#red]> udp_payload **: udp_payload(shm, offset, length)
+        activate udp_payload #FFBBBB
+        udp_sender -[#red]> timer: start()
+                udp_payload -[#red]> shm_o : get_address()
+        activate shm_o #FFBBBB
+                shm_o --[#red]> udp_payload : address
+        deactivate shm_o
+        udp_payload -[#red]> udp_payload: std::memcpy(dest, src, len)
+        udp_sender -[#red]> udp_sender: send_to(udp_payload, address)
+        deactivate udp_payload
+        deactivate udp_sender
+
+        'receive
+        udp_receiver --[#blue]> udp_payload **: *(udp_payload *) &recv_buffer
+        activate udp_payload #lightblue
+        udp_receiver -[#blue]> udp_payload: payload.data, payload.offset, payload.length
+        udp_payload --[#blue]> udp_receiver: payload.data, payload.offset, payload.length
+        deactivate udp_payload
+        udp_receiver -[#blue]> shm_o : set_data(payload.data, payload.offset, payload.length)
+        udp_receiver -[#blue]> timer: end()
+    end
+else receive mode
+    main -[#red]> udp_receiver : change_to_receive_and_resend()
+    deactivate udp_receiver
+    udp_receiver -[#red]>> udp_receiver : start_async_receive_and_resend()
+    activate udp_receiver #lightblue
+end
+
+main -[#red]> main : std::this_thread::sleep_for(std::chrono::microseconds(10000))
+
+main -[#red]> main : stop_rm_daemon()
+
+timer -[#red]> timer : print_times()
+deactivate timer
+
+
+@enduml

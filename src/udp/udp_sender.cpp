@@ -102,7 +102,7 @@ public:
     }
 
     /// sends a segment of the shm
-    void send_data(const void *source, size_t length)
+    void send_data(const void *source, const size_t length)
     {
         if(sizeof(shm_struct) <= 1464) { // data fits into one diagram
 
