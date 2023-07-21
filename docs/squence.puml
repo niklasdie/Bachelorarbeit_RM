@@ -3,7 +3,6 @@
 autonumber
 
 participant main order 10
-participant timer order 20
 participant shm_o order 30
 participant udp_sender order 40
 participant udp_receiver order 50
@@ -18,13 +17,11 @@ activate shm_o #FFBBBB
 shm_o -[#red]> shm_o: remove old shm
 shm_o -[#red]> shm_o: create new shm
 shm_o -[#red]> shm_o: map data into shm
-main --[#red]> timer**: timer(".")
-activate timer #FFBBBB
-main --[#red]> udp_sender** : udp_sender(io_service, shm, multicast_ip, port, ti)
+main --[#red]> udp_sender** : udp_sender(io_service, shm, multicast_ip, port)
 activate udp_sender #FFBBBB
 udp_sender -[#red]> udp_sender: configure socket
 udp_sender -[#red]> udp_sender: configure endpoint
-main --[#red]> udp_receiver** : udp_receiver(io_service, shm, multicast_ip, port, sender, ti, false)
+main --[#red]> udp_receiver** : udp_receiver(io_service, shm, multicast_ip, port, sender)
 activate udp_receiver #FFBBBB
 note right #lightblue
 blue marks a

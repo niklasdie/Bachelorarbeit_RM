@@ -5,7 +5,7 @@ class main{
 }
 
 together {
-abstract shm_o{
+struct shm_o{
 -shn_obj: boost::interprocess::shard_memory_object
 -region: boost::interprocess::mapped_region
 -shm_s: *shm_struct
