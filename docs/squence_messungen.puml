@@ -1,6 +1,7 @@
 @startuml
 
 autonumber
+'!pragma teoz true
 
 participant main order 10
 participant timer order 20
@@ -9,7 +10,7 @@ participant udp_sender order 40
 participant udp_receiver order 50
 participant udp_payload order 60
 
-'setup
+==Initialization==
 activate main #FFBBBB
 main -[#red]> main: reads args
 main -[#red]> main: setup logger
@@ -35,8 +36,8 @@ udp_receiver -[#red]> udp_receiver: configure endpoint
 udp_receiver -[#red]>> udp_receiver : start_async_receive()
 activate udp_receiver #lightblue
 
-'send
-main -[#red]> udp_sender : send_data(offset, length)
+==Send==
+{start} main -[#red]> udp_sender : send_data(offset, length)
 activate udp_sender #FFBBBB
 udp_sender --[#red]> udp_payload **: udp_payload(shm, offset, length)
 activate udp_payload #FFBBBB
@@ -50,17 +51,21 @@ udp_sender -[#red]> udp_sender: send_to(udp_payload, address)
 deactivate udp_payload
 deactivate udp_sender
 
-'receive
+==Receive==
 udp_receiver --[#blue]> udp_payload **: *(udp_payload *) &recv_buffer
 activate udp_payload #lightblue
 udp_receiver -[#blue]> udp_payload: payload.data, payload.offset, payload.length
 udp_payload --[#blue]> udp_receiver: payload.data, payload.offset, payload.length
 deactivate udp_payload
-udp_receiver -[#blue]> shm_o : set_data(payload.data, payload.offset, payload.length)
+{end} udp_receiver -[#blue]> shm_o : set_data(payload.data, payload.offset, payload.length)
 udp_receiver -[#blue]> timer: end()
+
+'{start} <-> {end}: Latenz
 
 main -[#red]> main: std::this_thread::sleep_for(std::chrono::milliseconds(2000))
 main -[#red]> timer : clear()
+
+==Mode==
 
 alt send mode
     main -[#red]> main : sleep(200)

@@ -1,0 +1,29 @@
+@startuml
+
+autonumber
+
+participant api order 10
+participant shm_o order 30
+participant udp_sender order 40
+participant udp_payload order 60
+
+
+'send
+api -[#red]> shm_o : set_data(src, offset, length)
+activate api #FFBBBB
+activate shm_o #FFBBBB
+deactivate shm_o
+api -[#red]> udp_sender : send_data(offset, length)
+deactivate api
+activate udp_sender #FFBBBB
+udp_sender --[#red]> udp_payload **: udp_payload(shm, offset, length)
+activate udp_payload #FFBBBB
+        udp_payload -[#red]> shm_o : get_address()
+activate shm_o #FFBBBB
+        shm_o --[#red]> udp_payload : address
+deactivate shm_o
+udp_payload -[#red]> udp_payload: std::memcpy(dest, src, len)
+udp_sender -[#red]> udp_sender: send_to(udp_payload, address)
+deactivate udp_payload
+
+@enduml
