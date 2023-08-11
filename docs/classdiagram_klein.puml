@@ -1,0 +1,31 @@
+@startuml
+
+class main{}
+
+together {
+struct shm_o{}
+
+struct timer{}
+
+struct udp_sender {}
+
+struct udp_receiver{}
+
+struct udp_payload {}
+}
+
+udp_sender o-up- shm_o
+udp_sender o-- timer
+udp_receiver o-- shm_o
+udp_receiver o-right- udp_sender
+udp_receiver *-- timer
+
+main -right-> shm_o: erstellt >
+main --> udp_sender: erstellt >
+main --> udp_receiver: erstellt >
+main -left-> timer: erstellt >
+udp_sender --> udp_payload: nutzt >
+udp_receiver --> udp_payload: nutzt >
+
+
+@enduml

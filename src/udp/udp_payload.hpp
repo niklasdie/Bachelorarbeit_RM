@@ -10,19 +10,19 @@
 struct udp_payload {
     unsigned int offset;       // offset of data within the shm
     unsigned int length;       // length of data
-    char data[1452];           // data
+    char data[1464];           // data
 
-    udp_payload(shm_o &shm, ptrdiff_t offset, int length) : offset(offset), length(length)
+    udp_payload(shm_o &shm, const ptrdiff_t offset, const int length) : offset(offset), length(length)
     {
-        // TODO: length must be smaller than 1440-offset and bigger than 0
-        // TODO: offset must be bigger than 0 and smaller than 1440
+        // TODO: offset must be bigger than 0 and smaller than 1464
+        // TODO: length must be smaller than 1464-offset and bigger than 0
         std::memcpy((void*) &data[0], (void*) (((char *) shm.get_address()) + offset), length);
     }
 
 };
 
 static std::ostream &operator<<(std::ostream &os, const unsigned char data[]) {
-    for (std::size_t i = 0; i < 1440; ++i) {
+    for (std::size_t i = 0; i < 1464; ++i) {
         os << data[i];
     }
     return os;

@@ -1,0 +1,26 @@
+@startuml
+
+autonumber
+
+'participant api order 10
+participant shm_o order 30
+participant udp_receiver order 50
+participant udp_payload order 60
+
+
+'activate api #FFBBBB
+activate udp_receiver #lightblue
+?-> udp_receiver: Datagramm
+
+'receive
+udp_receiver --[#blue]> udp_payload **: *(udp_payload *) &recv_buffer
+activate udp_payload #lightblue
+udp_receiver -[#blue]> udp_payload: payload.data, payload.offset, payload.length
+udp_payload --[#blue]> udp_receiver: payload.data, payload.offset, payload.length
+deactivate udp_payload
+udp_receiver -[#blue]> shm_o : set_data(payload.data, payload.offset, payload.length)
+activate shm_o #lightblue
+deactivate shm_o
+
+
+@enduml

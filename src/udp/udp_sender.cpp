@@ -20,7 +20,7 @@ struct udp_sender
         // configuring socket
         socket.open(udp::v4());
         socket.set_option(boost::asio::ip::multicast::enable_loopback(false));
-        socket.set_option(boost::asio::socket_base::send_buffer_size(146000));
+        socket.set_option(boost::asio::socket_base::send_buffer_size(147200));
         socket.set_option(boost::asio::socket_base::linger(false, 0));
         socket.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::make_address(multicast_ip)));
 
@@ -55,7 +55,7 @@ public:
     /// sends the entire shm
     void send_data()
     {
-        if(sizeof(shm_struct) <= 1452) { // data fits into one diagram
+        if(sizeof(shm_struct) <= 1464) { // data fits into one diagram
 
             // create payload from data of shm
             udp_payload packet(shm_, 0, sizeof(shm_struct));
@@ -78,7 +78,7 @@ public:
             int offset = 0;
 
             while (offset < sizeof(shm_struct)) {
-                int length = (sizeof(shm_struct) - offset >= 1452) ? 1452 : sizeof(shm_struct) - offset;
+                int length = (sizeof(shm_struct) - offset >= 1464) ? 1464 : sizeof(shm_struct) - offset;
 
                 // create payload from data of shm
                 udp_payload packet(shm_, offset, length);
@@ -102,9 +102,9 @@ public:
     }
 
     /// sends a segment of the shm
-    void send_data(const void *source, size_t length)
+    void send_data(const void *source, const size_t length)
     {
-        if(sizeof(shm_struct) <= 1452) { // data fits into one diagram
+        if(sizeof(shm_struct) <= 1464) { // data fits into one diagram
 
             // create payload from data of shm
             udp_payload packet(shm_, ((char *) source) - ((char *) shm_.get_address()), length);
@@ -126,7 +126,7 @@ public:
             int offset = 0;
 
             while (offset < length) {
-                int length_ = (length - offset >= 1452) ? 1452 : length - offset;
+                int length_ = (length - offset >= 1464) ? 1464 : length - offset;
 
                 // create payload from data of shm
                 udp_payload packet(shm_, ((char *) source) - ((char *) shm_.get_address()) + offset, length_);
@@ -153,7 +153,7 @@ public:
     void send_data(const size_t offset, const size_t length)
     {
 
-        if(sizeof(shm_struct) <= 1452) { // data fits into one diagram
+        if(sizeof(shm_struct) <= 1464) { // data fits into one diagram
 
             // create payload from data of shm
             udp_payload packet(shm_, offset, length);
@@ -175,7 +175,7 @@ public:
             int offset_ = 0;
 
             while (offset_ < length) {
-                int length_ = (length - offset_ >= 1452) ? 1452 : length - offset_;
+                int length_ = (length - offset_ >= 1464) ? 1464 : length - offset_;
 
                 // create payload from data of shm
                 udp_payload packet(shm_, offset + offset_, length_);

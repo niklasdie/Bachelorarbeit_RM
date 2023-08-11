@@ -1,85 +1,101 @@
 @startuml
 
 class main{
-{static}main(argc: int, argv: *char[]): int
+{static}main(argc: int, argv: char*[]): int
 }
 
 together {
-abstract shm{
-#region mapped_region
-+{abstract}print_data(): void
-+{abstract}set_data(data: const &std::string): bool
-+{abstract}set_data(data: const &std::string, offset: int): bool
-+{abstract}get_data(): std::string
-+{abstract}get_data(offset: int): std::string
-+{abstract}get_data(offset: int, length: int): std::string
-}
-
 struct shm_o{
-+shm_o(size: int)
--shm_obj: shared_memory_object
+-shn_obj: boost::interprocess::shard_memory_object
+-region: boost::interprocess::mapped_region
+-shm_s: *shm_struct
+-writing: bool
+-reading: bool
+-shm_name: const char*
++shm_o(shm_name: const char*)
++get_address(): void*
++get_size(): size_t
++set_data(src: const void*): bool
++set_data(src: const void*, length: const size_t): bool
++set_data(src: const void*, dest: const void*, length: const size_t): bool
++set_data(src: const void*, offset: const size_t, length: const size_t): bool
++set_data(data: const &shm_struct): bool
++get_data(dest: void*): bool
++get_data(dest: void*, length: const size_t): bool
++get_data(src: const void*, dest: void*, length: const size_t): bool
++get_data(dest: void*, offset: const size_t, length: const size_t): bool
++get_data_struct(): shm_struct&
++get_data_bytes_as_string(): std::string
 }
 
-struct shm_f{
-+shm_f(file: const &std::string, size: int)
--shm_file: file_mapping
-}
-}
-
-shm <|-up- shm_o
-shm <|-up- shm_f
-
-together {
 struct udp_sender {
--io_context: boost::asio::io_context
--socket: udp::socket
--destination_endpoint: udp::endpoint
--shm_: &shm
-+udp_sender(shm: &shm, dest_ip: const *char, port: int)
-+send_data(data: std::string): void
-+send_data(offset: int): void
-+send_data(offset: int, length: int): void
+-io_context: boost::asio::io_context&
+-socket: boost::asio::ip::udp::socket
+-destination_endpoint: boost::asio::ip::udp::endpoint
+-shm_: shm_o&
+-ti: timer&
++udp_sender(io_context: boost::asio::io_context, shm_o: shm_o&, multicast_ip: const char*, port: int, ti: timer&)
++send_data(): void
++send_data(source: const void*, length: const size_t): void
++send_data(offset: const size_t, length: const size_t): void
 }
 
 struct udp_receiver{
--io_service: boost::asio::io_service
--socket: udp::socket
--recv_buffer: boost::array<char, 1024>
--shm_: &shm
--host_ip: std::string
--port: int
--sender: &udp_sender
--ti: &timer
-+udp_receiver(shm: &shm, local_ip: const *char, port: int, sender: &udp_sender, ti: &timer)
--handle_receive(error: const &boost::system::error_code, bytes_transferred: size_t):void
--handle_receive_and_send_back(error: const &boost::system::error_code, bytes_transferred: size_t): void
--wait(): void
--wait_and_send_back(): void
+-io_service: boost::asio::io_service&
+-socket: boost::asio::ip::udp::socket
+-th_io_context_run: boost::thread
+-th_handle_receive: boost::thread
+-shm_: shm_o&
+-sender: udp_sender&
+-recv_buffer: char[]
+-ti: timer&
++udp_receiver(io_context: boost::asio::io_context, shm_o: shm_o&, multicast_ip: const char*, sender: udp_sender&, ti: timer&, resend: bool)
+-handle_receive(error: const boost::system::error_code&, bytes_transferred: size_t):void
+-handle_receive_and_send_back(error: const boost::system::error_code&, bytes_transferred: size_t): void
+-start_async_receive(): void
+-start_async_receive_and_resend(): void
+-run_context(): void
 +receive(): void
-+receive_and_send_back(): void
++change_to_receive_and_resend(): void
++change_to_receive(): void
++interrupt(): void
 }
+
+struct udp_payload {
++offset: unsigned int
++length: unsigned int
++data: char[1464]
++udp_payload(shm: shm&, offset: const ptrdiff_t, length: const int)
 }
 
 struct timer{
 +start_: std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>
 +end_: std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>
-+average: std::vector<long>
++average_: std::vector<long>
++checkpoint_: std::vector<long>
++checkpoint_size: std::vector<int>
 +messages: std::vector<std::string>
-+start(msg: std::string): void
-+end(msg: std::string): void
++file: std::ofstream
++file_average: std::ofstream
++timer(filepath: const char*)
++start(): void
++end(): void
++checkpoint(): void
 +clear(): void
 }
 
-udp_sender o-up- shm
-udp_receiver o-up- shm
+udp_sender o-up- shm_o
+udp_sender o-up- timer
+udp_receiver o-up- shm_o
 udp_receiver o-up- udp_sender
 udp_receiver o-up- timer
 
-main -up-> shm_o: erstellt >
-main -up-> shm_f: erstellt >
+main -right-> shm_o: erstellt >
 main -down-> udp_sender: erstellt >
 main -down-> udp_receiver: erstellt >
-main -right-> timer: erstellt >
+main -left-> timer: erstellt >
+udp_sender -down-> udp_payload: nutzt >
+udp_receiver -left-> udp_payload: nutzt >
 
 
 @enduml

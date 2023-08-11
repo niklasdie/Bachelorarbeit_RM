@@ -4,6 +4,11 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/socket_base.hpp>
+#include <assert.h>
+#include <netinet/ip.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include "udp_sender.cpp"
 
@@ -20,7 +25,9 @@ struct udp_receiver
     {
         // configuring socket
         socket.open(udp::v4());
-        socket.set_option(boost::asio::socket_base::receive_buffer_size(146000));
+        socket.set_option(boost::asio::socket_base::receive_buffer_size(1472000));
+        int priority = 1;
+        setsockopt(socket.native_handle(), SOL_SOCKET, SO_PRIORITY, &priority, sizeof(priority));
         socket.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::make_address(multicast_ip)));
         BOOST_LOG_TRIVIAL(debug) << "Multicast address: " << multicast_ip;
         // bind to endpoint
@@ -174,6 +181,6 @@ private:
     boost::thread th_handle_receive;
     shm_o &shm_;
     udp_sender &sender;
-    char recv_buffer[1460];
+    char recv_buffer[1472];
     timer &ti;
 };
