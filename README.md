@@ -1,1 +1,1 @@
-Reflective Memory Daemon for my bachelor thesis.
+Reflective Memory Daemon meiner Bacheloarbeit. Die Ausarbeitung meiner Bachelorarbeit ist unter Releases zu finden.
