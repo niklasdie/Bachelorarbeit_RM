@@ -1,6 +1,8 @@
 # Bachelorarbeit
 
-Reflective Memory Daemon meiner Bacheloarbeit. Die schriftliche Ausarbeitung meiner Bachelorarbeit ist unter Releases zu finden.
+Reflective Memory Daemon meiner Bacheloarbeit.
+Die schriftliche Ausarbeitung meiner Bachelorarbeit ist unter Releases zu finden.
+Diese Bachelorarbeit wurde mit der Note 1,0 bewertet.
 
 ## Realisierung von Reflective Memory über Ethernet
 
